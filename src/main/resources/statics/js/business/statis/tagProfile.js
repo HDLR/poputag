@@ -73,7 +73,7 @@ var vm = new Vue({
 		},
 		getTagsTree: function() {
 			//加载菜单树
-			$.get("../label/h50taginfo/queryAllTagsAndGroupTags", function(r){
+			$.get(ctxPath + "/label/h50taginfo/queryAllTagsAndGroupTags", function(r){
 				ztree = $.fn.zTree.init($("#menuTree"), setting, r.tags);
 				//展开所有节点
 				ztree.expandAll(false);
@@ -142,7 +142,7 @@ var vm = new Vue({
 			    $(this).hide();
 			});
 	    	
-	    	ajaxFunctionPost("../statis/tags/profile", {"checkTags":checkTags.join()}, 
+	    	ajaxFunctionPost(ctxPath + "/statis/tags/profile", {"checkTags":checkTags.join()},
     			vm.successPro, function(r){
     				alert("调用系统异常，请联系管理人员定位");
     			}
@@ -190,7 +190,7 @@ var vm = new Vue({
 	    },
 	    queryTagUsage: function(checkTags){
 	    	//标签使用分析
-	    	ajaxFunctionPost("../userGroup/macroscopicPicture/queryTagsDistribute", {"checkTags":checkTags.join()}, 
+	    	ajaxFunctionPost(ctxPath + "/userGroup/macroscopicPicture/queryTagsDistribute", {"checkTags":checkTags.join()},
     			vm.queryTagUsageSuc, 
     			function(r){
     				//alert("调用系统异常，请联系管理人员定位");
@@ -222,7 +222,7 @@ var vm = new Vue({
 	    		}
 	    	}
 	    	
-	    	ajaxFunctionPost("../userGroup/macroscopicPicture/queryTagArea", {"checkTags":tagSelect.join()}, 
+	    	ajaxFunctionPost(ctxPath + "/userGroup/macroscopicPicture/queryTagArea", {"checkTags":tagSelect.join()},
     			function(r){
 	    			vm.tagEchart = r.echartData;
 	    			vm.$nextTick(function () {
@@ -435,7 +435,7 @@ function setEcharts3(title, persons, chartId){
 	var dom3 = document.getElementById(chartId);
     var myChart3 = echarts.init(dom3);
     
-    var uploadedDataURL = ctxPath + "/js/public/map/hai_nan_geo.json";
+    var uploadedDataURL = ctxPath + "/statics/js/business/public/map/hai_nan_geo.json";
     
     $.get(uploadedDataURL, function(geoJson) {
     	var name = 'hn';

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-<title></title>
-#parse("sys/header.html")
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:include="sys/header.html::head"></head>
+<body th:include="sys/header.html::body"></body>
 <style type="text/css"> 
 .onclickCampClass{
 	background-color: #0073c2;
@@ -19,7 +18,7 @@
 	<div style="border-radius:5px; border:1px solid #c5c3de; height:98%; width:20%; background-color:#FFF; margin:5px 5px 5px 5px; float:left; overflow:auto;">
  		<div style="height:140px; border-bottom:0.5px dashed #D8D8D8; text-align:center; margin-left:20px; margin-right:20px;">
 			<div style="height:100px; margin:15px 5px 5px 5px;">
-				<img src="${rc.contextPath}/statics/image/group/picture.png"/>
+				<img th:src="@{/statics/image/group/picture.png}"/>
 			</div>
 			<div style="height:10px; margin:10px 5px 0 5px;">标签分析</div>
 		</div>
@@ -76,7 +75,7 @@
 		</div>
 	</div>
 </div>
-<script src="${rc.contextPath}/js/public/echarts.min.js?_${date.systemTime}"></script>
-<script src="${rc.contextPath}/js/statis/tagProfile.js?_${date.systemTime}"></script>
+<script th:src="@{/statics/js/public/echarts.min.js}"></script>
+<script th:src="@{/statics/js/business/statis/tagProfile.js}"></script>
 </body>
 </html>
