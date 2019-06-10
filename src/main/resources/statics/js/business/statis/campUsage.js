@@ -42,7 +42,7 @@ var vm = new Vue({
 		},
 		getTagsTree: function() {
 			//加载菜单树
-			$.get("../statis/queryCampaignTress", function(r){
+			$.get(ctxPath + "/statis/queryCampaignTress", function(r){
 				ztree = $.fn.zTree.init($("#menuTree"), setting, r.campTress);
 				//展开所有节点
 				ztree.expandAll(true);
@@ -68,7 +68,7 @@ function treesOnClick(){
 		vm.showList = false;
 		var campIdJoin = campIds.join();
 		
-		ajaxFunctionPost("../userGroup/analysis/list", {"campIds":campIdJoin}, 
+		ajaxFunctionPost(ctxPath + "/userGroup/analysis/list", {"campIds":campIdJoin},
 			function(r){
 				setEcharts3("用户群热度（含有人数）对比分析", r.camps, "group_heat");
 			}, function(r){
@@ -76,7 +76,7 @@ function treesOnClick(){
 			}
 		);
 		
-		ajaxFunctionPost("../statis/usage/campUsageLog", {"campIds":campIdJoin}, 
+		ajaxFunctionPost(ctxPath + "/statis/usage/campUsageLog", {"campIds":campIdJoin},
 			function(r){
 				setEcharts2("用户群使用对比分析", r.usageLog, "group_usage");
 			}, function(r){
