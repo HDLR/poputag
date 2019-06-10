@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.userGroup.dao.H50FlatRuleConfigDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.userGroup.entity.H50FlatRuleConfigEntity" id="BaseResultMap">
+        <result property="indxCatCd" column="indx_cat_cd"/>
+        <result property="indxTblNm" column="indx_tbl_nm"/>
+        <result property="indsClsCd" column="inds_cls_cd"/>
+        <result property="indxClmnNm" column="indx_clmn_nm"/>
+        <result property="stattIndxId" column="statt_indx_id"/>
+        <result property="dimId" column="dim_id"/>
+        <result property="indxCalcModeCd" column="indx_calc_mode_cd"/>
+        <result property="flatTblNm" column="flat_tbl_nm"/>
+        <result property="flatClmnNm" column="flat_clmn_nm"/>
+        <result property="activeInd" column="active_ind"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+        <result property="tagCtgyNm" column="tag_ctgy_nm"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h50_flat_rule_config
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h50_flat_rule_config
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="getRuleConfig" resultMap="BaseResultMap">
+		select * from h50_flat_rule_config
+	</select>
+</mapper>

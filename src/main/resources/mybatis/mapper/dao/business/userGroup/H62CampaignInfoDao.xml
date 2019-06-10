@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.userGroup.dao.H62CampaignInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.userGroup.entity.H62CampaignInfoEntity" id="BaseResultMap">
+        <result property="campId" column="camp_id"/>
+        <result property="campNm" column="camp_nm"/>
+        <result property="campDesc" column="camp_desc"/>
+        <result property="campIndsCd" column="camp_inds_cd"/>
+        <result property="startDt" column="start_dt"/>
+        <result property="endDt" column="end_dt"/>
+        <result property="indvNum" column="indv_num"/>
+        <result property="campChnlCd" column="camp_chnl_cd"/>
+        <result property="templtId" column="templt_id"/>
+        <result property="campStatusCd" column="camp_status_cd"/>
+        <result property="userId" column="user_id"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+    </resultMap>
+    
+    <select id="queryCampaignTress" resultType="hashMap">
+		SELECT
+			'P_A' campId,
+			'用户群组' name,
+			'' parentId
+		FROM
+			DUAL
+		UNION
+			SELECT
+				c.camp_id,
+				c.camp_nm,
+				'P_A'
+			FROM
+				h62_campaign_info c
+	</select>
+    
+    <select id="queryCampaignTress2" resultType="hashMap">
+			SELECT
+				c.camp_id campId,
+				c.camp_nm name,
+				'P_A' parentId
+			FROM
+				h62_campaign_info c
+	</select>
+	
+	<select id="queryCampaignInfoAll" resultMap="BaseResultMap">
+		select * from h62_campaign_info 
+	</select>
+	
+	<select id="queryList" resultMap="BaseResultMap">
+		select 
+			camp_id,
+			camp_nm,
+			camp_desc,
+			start_dt,
+			end_dt,
+			indv_num,
+			camp_chnl_cd,
+			templt_id,
+			camp_status_cd,
+			user_id,
+			(select b.username from sys_user b where b.user_id=a.user_id) camp_inds_cd,
+			created_ts,
+			updated_ts
+		from h62_campaign_info a
+        <where>
+			<if test="campNm != null and campNm.trim() != ''">
+				and `camp_nm` like concat('%',#{campNm},'%') 
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_campaign_info
+        <where>
+			<if test="campNm != null and campNm.trim() != ''">
+				and `camp_nm` like concat('%',#{campNm},'%') 
+			</if>
+		</where>
+	</select>
+	
+	<select id="getScreeningTags" resultType="hashmap">
+	    SELECT
+	        ctr.camp_id screeningId,
+	        ctr.tag_group_seq grpSeq,
+	        ctr.tag_id tagId,
+	        ctr.tag_ctgy_id tagCtgyId,
+	        tci.tag_ctgy_nm tagCtgyNm,
+	        ti.tag_nm tagNm
+	    FROM (select * from h62_campaign_tag_rela  where camp_id=#{campId}) ctr
+	    inner join h50_tag_category_info tci on ctr.tag_ctgy_id = tci.tag_ctgy_id
+	    inner join h50_tag_info ti on ctr.tag_id = ti.tag_id;
+	</select>
+	
+	<select id="getGroupScreeningTags" resultType="hashmap">
+		SELECT
+	        ctr.camp_id screeningId,
+	        ctr.tag_group_seq grpSeq,
+	        ctr.tag_id tagId,
+	        ctr.tag_ctgy_id tagCtgyId,
+	        '组合列表' tagCtgyNm,
+	        ti.tag_nm tagNm
+	    FROM (select * from h62_campaign_tag_rela  where camp_id=#{campId}) ctr
+	    inner join h50_taggroup_info ti on ctr.tag_id = ti.tag_id;
+	</select>
+	
+	<select id="getScreeningTagsSms" resultType="hashmap">
+	   SELECT 
+		  ti.tag_id tagId,
+		  ti.tag_ctgy_id tagCtgyId,
+		  tci.tag_ctgy_nm tagCtgyNm,
+		  ti.tag_nm  tagNm
+		FROM
+		  h50_tag_info ti 
+		  INNER JOIN h50_tag_category_info tci 
+		    ON ti.tag_ctgy_id = tci.tag_ctgy_id 
+		WHERE tag_id = '1001011001' 
+  </select>
+</mapper>

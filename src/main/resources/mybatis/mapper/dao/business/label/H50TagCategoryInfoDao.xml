@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.label.dao.H50TagCategoryInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity" id="BaseResultMap">
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="tagCtgyNm" column="tag_ctgy_nm"/>
+    </resultMap>
+    
+    <resultMap type="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity" id="recursionMenuMap">
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="tagCtgyNm" column="tag_ctgy_nm"/>
+        <collection property="children" ofType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity" column="tag_ctgy_id" select="findMenuByParentId"/>
+    </resultMap>
+    
+    <select id="findAllRecursion" resultMap="recursionMenuMap">
+        SELECT tag_ctgy_id,tag_ctgy_nm,up_tag_ctgy_id FROM h50_tag_category_info WHERE up_tag_ctgy_id ='' or up_tag_ctgy_id is NULL 
+    </select>
+    
+     <select id="findMenuByParentId" resultMap="recursionMenuMap">
+        SELECT tag_ctgy_id,tag_ctgy_nm,up_tag_ctgy_id FROM h50_tag_category_info WHERE up_tag_ctgy_id = #{tag_ctgy_id} 
+    </select>
+    
+	<select id="queryList" resultMap="BaseResultMap" >
+		SELECT
+				c.tag_ctgy_id AS tag_ctgy_id,
+				c.tag_ctgy_nm AS tag_ctgy_nm,
+				c.tag_desc AS tag_desc,
+				c.tag_type_cd AS tag_type_cd,
+				CASE c.up_tag_ctgy_id
+			WHEN '' THEN
+				NULL
+			END AS up_tag_ctgy_id,
+			 CASE c.have_tag_ind
+			WHEN '' THEN
+				0
+			WHEN NULL THEN
+				0
+			ELSE
+				c.have_tag_ind
+			END AS have_tag_ind,
+			 c.enabled_dt AS enabled_dt,
+			 c.disabled_dt AS disabled_dt 
+			FROM
+				h50_tag_category_info c 
+			WHERE
+				 (
+					c.tag_ctgy_status = 2
+					AND (
+						c.enabled_dt IS NULL
+						OR TIMESTAMPDIFF(MINUTE, now(), c.enabled_dt) &lt; 0
+					)
+					AND (
+						c.disabled_dt IS NULL
+						OR TIMESTAMPDIFF(MINUTE, now(), c.disabled_dt) &gt; 0
+					)
+				) 
+			AND c.up_tag_ctgy_id IS NULL
+			OR c.up_tag_ctgy_id = ''
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h50_tag_category_info
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询标签的树结构信息  -->
+	<select id="getTagCategoryTree" resultType="hashMap" parameterType="hashmap">
+		SELECT
+			CASE up_tag_ctgy_id
+			WHEN '' THEN
+				0
+			else up_tag_ctgy_id
+			end
+			as parentId,
+			tag_ctgy_id menuId,
+		 	tag_ctgy_nm name,
+		 	tag_ctgy_level tagCtgyLevel,
+			tag_ctgy_status tagCtgyStatus
+		FROM
+			h50_tag_category_info t
+		<where>
+			<if test="creatdateStart != null">
+				DATE_FORMAT(t.created_ts, '%Y-%m-%d')<![CDATA[>=]]> #{creatdateStart}
+			</if>
+			<if test="creatdateEnd != null">
+				and DATE_FORMAT(t.created_ts, '%Y-%m-%d')<![CDATA[<=]]> #{creatdateEnd}
+			</if>
+		</where>
+		
+	</select>
+	
+	<!-- have_tag_ind =0 的查询 -->
+	<select id="getTag" resultType="hashMap">
+		SELECT
+			CASE up_tag_ctgy_id
+			WHEN '' THEN
+				0
+			else up_tag_ctgy_id
+			end
+			as parentId,
+			tag_ctgy_id menuId,
+		 	tag_ctgy_nm name,
+		 	tag_ctgy_level tagCtgyLevel,
+			tag_ctgy_status tagCtgyStatus
+		FROM
+			h50_tag_category_info 
+		<where>
+			 	<if test="_parameter != null and _parameter== '0'.toString()">
+    			have_tag_ind=#{haveTagInd}
+ 				</if>
+		</where>
+	</select>
+	<insert id="insertTagCategoryInfo" parameterType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity">
+		insert into h50_tag_category_info
+		       (tag_ctgy_id,tag_ctgy_nm,tag_ctgy_status,have_tag_ind,tag_ctgy_level,up_tag_ctgy_id,tag_desc,tag_type_cd,enabled_dt,disabled_dt,created_ts,updated_ts,create_user) 
+		values
+			   (#{tagCtgyId},#{tagCtgyNm},#{tagCtgyStatus},#{haveTagInd},#{tagCtgyLevel},#{upTagCtgyId},#{tagDesc},#{tagTypeCd},#{enabledDt},#{disabledDt},now(),now(),#{createUser});
+	</insert>
+	
+	<update id="upLine" parameterType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity">
+		update h50_tag_category_info  set tag_ctgy_status='2',update_user=#{updateUser} where tag_ctgy_id=#{tagCtgyId}
+	</update>
+	
+	
+	<select id="getChildrens" resultType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity" parameterType="string">
+		select
+		tag_ctgy_id tagCtgyId,
+		tag_ctgy_nm tagCtgyNm,
+		tag_type tagType
+		from	h50_tag_category_info
+		<!-- where tag_ctgy_status = 2 -->
+			where up_tag_ctgy_id = #{tagCtgyId}
+		union all
+		select
+		tag_id tagCtgyId,
+		tag_nm tagCtgyNm,
+		tag_type tagType
+		from	h50_tag_info
+			where
+		tag_ctgy_id =#{tagCtgyId}
+	</select>
+	
+	<update id="downLine" parameterType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity">
+		update h50_tag_category_info  set tag_ctgy_status=#{tagCtgyStatus},disabled_dt=#{disabledDt} where tag_ctgy_id=#{tagCtgyId}
+	</update>
+	
+	<!-- 查询标签类别的所有信息 -->
+	<select id="getCtgyList" resultType="com.eastern.jinxin.business.label.entity.H50TagCategoryInfoEntity">
+		SELECT
+			t.tag_ctgy_id tagCtgyId,
+			t.tag_ctgy_nm tagCtgyNm,
+			t.up_tag_ctgy_id upTagCtgyId,
+			(select tag_ctgy_nm from h50_tag_category_info where tag_ctgy_id=t.up_tag_ctgy_id) upTagCtgyNm
+		FROM
+			h50_tag_category_info t
+		WHERE
+			up_tag_ctgy_id IN (
+				SELECT
+					tag_ctgy_id
+				FROM
+					h50_tag_category_info t
+				WHERE
+					t.up_tag_ctgy_id = ''
+			) 
+	</select>
+</mapper>

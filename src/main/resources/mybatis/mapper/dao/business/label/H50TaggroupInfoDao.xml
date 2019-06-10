@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.label.dao.H50TaggroupInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.label.entity.H50TaggroupInfoEntity" id="BaseResultMap">
+        <result property="tagId" column="tag_id"/>
+        <result property="tagNm" column="tag_nm"/>
+        <result property="tagDesc" column="tag_desc"/>
+        <result property="tagGroupContent" column="tag_group_content"/>
+        <result property="tagTypeCd" column="tag_type_cd"/>
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="enabledDt" column="enabled_dt"/>
+        <result property="disabledDt" column="disabled_dt"/>
+        <result property="activeInd" column="active_ind"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="tagType" column="tag_type"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h50_taggroup_info
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h50_taggroup_info
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	
+	<select id="getAllgroupTagContent" resultType="String">
+		SELECT
+			t.tag_group_content
+		FROM
+			h50_taggroup_info t
+	</select>
+	
+	<select id="queryTagsData" resultType="hashMap">
+		SELECT
+			'P_A' showparent_id,
+			'组合标签' showparent_nm,
+			'A' tag_ctgy_id,
+			'组合标签列表' tag_ctgy_nm,
+			a.tag_id,
+			a.tag_nm,
+			a.tag_group_content 
+		FROM
+			h50_taggroup_info a
+		where a.tag_id in 
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

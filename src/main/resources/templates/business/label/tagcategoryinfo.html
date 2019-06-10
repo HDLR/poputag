@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<link rel="stylesheet" href="${request.contextPath}/statics/plugins/layui/css/layui_new.css">
+<link rel="stylesheet" href="${request.contextPath}/statics/css/tag.css">
+</head>
+<style>
+	.container-fluid, .container-fluid>.row {
+		border: 0px solid #c5c3de;
+	}
+	
+	.container-fluid {
+		height: 100%;
+	}
+	
+	html, body {
+		height: 100%;
+		width: 100%;
+	}
+	
+	.container-fluid {
+		padding-right: 0px;
+		padding-left: 0px;
+		margin-right: auto;
+		margin-left: auto;
+	}
+</style>
+<body>
+<form></form>
+
+<div id="rrapp" v-cloak class="container-fluid">
+	<div class="row" style="height: 98%">
+		<div class="col-md-12"  style="height: 98%;padding:0px 2px 0px 0px;">
+			<div class="row pre-scrollable" id="tagShow"
+									style="max-height: 99%"></div>
+		</div>
+	</div>
+	
+</div>
+
+<script src="${rc.contextPath}/js/label/tagcategoryinfo.js?_${date.systemTime}"></script>
+</body>
+</html>

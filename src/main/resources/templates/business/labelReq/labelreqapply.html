@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+</head>
+<link rel="stylesheet" href="${rc.contextPath}/statics/css/timemain.css">
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showTimeAxis">
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+	          <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="标签名称">
+	        </div>
+	        <a class="btn btn-default" @click="query">查询</a>
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			<a class="btn btn-primary" @click="showProcess"><i class="fa fa-eye"></i>&nbsp;审核进度展示</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class='cus-p-diag'>
+    	<div class="panel panel-default cusdialog">
+			<div class="panel-heading">{{title}}</div>
+			<form class="form-horizontal">
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签名称</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.name" placeholder="标签名称"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签描述</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.describe" placeholder="标签描述"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签类别</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.type" placeholder="标签类别"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">申请部门</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.dep" placeholder="申请部门"/>
+				    </div>
+				</div>
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+				<br/>
+				<br/>
+				<br/>
+			</form>
+		</div>
+	</div>
+	
+	
+	<div v-show="!showTimeAxis" class="panel panel-default">
+    	<div class="panel panel-default">
+			<div class="panel-heading">审核进度</div>
+				
+				<div class="timer-shaft-box">
+					<div class="timer-shaft">
+						<div class="timer-left"></div>
+						<div class="timer-right"></div>
+						<div class="timer-scale">
+							<div class="timer-scale-cont" :class="labelReqApplyProcess.now == 'apply'? 'hov' : ''">
+								<p class="time-circle">申请</p>
+								<p class="line-scale"></p>
+							</div>
+							<div class="timer-scale-cont" :class="labelReqApplyProcess.now == 'check'? 'hov' : ''">
+								<p class="time-circle">审核</p>
+								<p class="line-scale"></p>
+							</div>
+							<div class="timer-scale-cont" :class="labelReqApplyProcess.now == 'production'? 'hov' : ''">
+								<p class="time-circle">生产</p>
+								<p class="line-scale"></p>
+							</div>
+							<div class="timer-scale-cont" :class="labelReqApplyProcess.now == 'finish'? 'hov' : ''">
+								<p class="time-circle">结束</p>
+							</div>
+						</div>
+					</div>
+					<div class="timer-shaft-content">
+						<div class="shaft-detail-cont" :style="labelReqApplyProcess.now == 'apply'? 'display: block;' : ''">
+							<p class="timer-year"><i class="icon-year"></i><span>提交申请</span></p>
+							<div class="month-detail-box">
+								<span class="month-title">{{labelReqApplyProcess.apply.date}}</span>
+								<p class="incident-record">{{labelReqApplyProcess.apply.msg}}</p>
+							</div>
+						</div>
+						<div class="shaft-detail-cont" :style="labelReqApplyProcess.now == 'check'? 'display: block;' : ''">
+							<p class="timer-year"><i class="icon-year"></i><span>审核结果</span></p>
+							<div class="month-detail-box">
+								<span class="month-title">{{labelReqApplyProcess.check.date}}</span>
+								<p class="incident-record"  v-html="labelReqApplyProcess.check.msg"></p>
+							</div>
+						</div>
+						<div class="shaft-detail-cont" :style="labelReqApplyProcess.now == 'production'? 'display: block;' : ''">
+							<p class="timer-year"><i class="icon-year"></i><span>生产过程</span></p>
+							<div class="month-detail-box" v-for="item in labelReqApplyProcess.production">
+								<span class="month-title">{{item.date}}</span>
+								<p class="incident-record">{{item.msg}}</p>
+							</div>
+						</div>
+						<div class="shaft-detail-cont" :style="labelReqApplyProcess.now == 'finish'? 'display: block;' : ''">
+							<p class="timer-year"><i class="icon-year"></i><span>结束</span></p>
+							<div class="month-detail-box">
+								<span class="month-title">{{labelReqApplyProcess.finish.date}}</span>
+								<p class="incident-record">{{labelReqApplyProcess.finish.msg}}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="form-group" style="text-align:center">
+					<input type="button" class="btn btn-warning" @click="showTimeAxis = true" value="关闭"/>
+				</div>
+				
+		</div>
+	</div>
+	
+</div>
+
+<script src="${rc.contextPath}/js/labelReq/labelreqapply.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/labelReq/sjz.js"></script>
+</body>
+</html>

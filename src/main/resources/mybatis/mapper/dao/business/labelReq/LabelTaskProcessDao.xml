@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.labelReq.dao.LabelTaskProcessDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.labelReq.entity.LabelTaskProcessEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="time" column="time"/>
+        <result property="process" column="process"/>
+        <result property="createTime" column="create_time"/>
+        <result property="taskManaId" column="task_mana_id"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from label_task_process
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from label_task_process
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryProcess" resultMap="BaseResultMap">
+		select * from label_task_process where task_mana_id = #{taskManaId}
+	</select>
+	
+	<delete id="deleteByTaskManaId">
+		delete from label_task_process where  task_mana_id = #{taskManaId}
+	</delete>
+	
+</mapper>

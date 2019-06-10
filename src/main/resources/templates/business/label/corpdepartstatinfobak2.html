@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>人口总览</title>
+#parse("sys/header.html")
+</head>
+<style>
+	/*定义滚动条轨道*/
+    ::-webkit-scrollbar-track
+    {
+        background-color: #F5F5F5;
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.22);
+    }
+    /*定义滚动条高宽及背景*/
+    ::-webkit-scrollbar
+    {
+        width: 5px;
+        background-color: rgba(0, 0, 0, 0.34);
+    }
+    /*定义滚动条*/
+    ::-webkit-scrollbar-thumb
+    {
+        background-color: rgba(0, 255, 255, 0.22);
+        border-radius: 10px;
+    }
+    .content {
+    min-height: 250px;
+    padding: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    backgroundColor:##f6f6f6;！important
+	}
+	body{
+		backgroundColor:#f6f6f6 !important
+	}
+</style>
+<body style="backgroundColor:#f6f6f6 !important">
+<div id="rrapp" v-cloak style="width:1080px;height:545px;backgroundColor:#f6f6f6">
+	<!-- 上 -->
+	<div style="width:180px;height:260px;float:left;margin:5px 3px 3px 5px;">
+		<div style="border-radius:5px;width:180px;height:129px;backgroundColor:#fff;margin:0px 0px 2px 0px;">
+			
+			<div style="width:100%;height:20px;float:left;margin:10px 0px 0px 10px;">
+			<img src="${rc.contextPath}/images/rk1.png" style="width:20px;"/>人口数据归集情况	
+			</div>
+			
+			<!-- 总数 -->
+			<div  style="width:100%;height:99px;float:left;">
+				<!-- 总数值 -->
+				<div id="allCountDiv" style="text-align:center;color:#e96900;font-size:20px;padding-top:25px;letter-spacing:3px;width:100%;height:70px;float:left;"> </div>
+				<!-- 条记录 -->
+				<div  style="text-align:center;width:100%;height:19px;float:left;margin:0px 0px 10px 0px">记录数（条）</div>
+			</div>
+		
+		</div>
+		<div id="percentDiv" style="border-radius:5px;width:180px;height:129px;backgroundColor:#FFF;margin:0px 0px px 0px;">
+			
+		</div>
+	</div>
+	
+	<!-- 海南省各单位数据归集状况 -->
+	<div  style="border-radius:5px;width:655px;height:260px;float:left;backgroundColor:#fff;margin:5px 3px 3px 0px;">
+		<div style="width:655px;height:20px;float:left;margin:10px 0px 0px 10px;">
+			<img src="${rc.contextPath}/images/rk1.png" style="width:20px;"/>
+			海南省各单位数据归集状况	
+		</div>
+		<!-- 海南省各单位数据质量 -->
+		<div id="leftUpContent" style="width:655px;height:210px;float:left;">
+		</div>
+		
+		<div  style="text-align: center; width: 100%; height: 19px; float: left; padding: 0px 0px 10px;">
+			<ul id="lunboDiv">
+			</ul>
+		</div>
+	
+	</div>
+	<div style="border-radius:5px;width:217px;height:260px;float:left;backgroundColor:#fff;margin:5px 3px 3px 0px;">
+		<div style="width:100%;height:15%;padding:10px 0px 0px 5px">
+			<img src="${rc.contextPath}/images/guijiitem.png" style="width:20px"/>已归集信息项
+		</div>
+		<div id="imputation" style="width:100%;height:80%;overflow-y:scroll;margin:0px 0px 0px 0px;">
+		</div>
+	
+	</div>
+	
+	<!-- 下 -->
+	
+	<div  style="border-radius:5px;width:838px;height:245px;float:left;backgroundColor:#fff;margin:0px 3px 3px 5px;">
+		<div style="width:838px;height:20px;float:left;margin:10px 0px 0px 10px;">
+			<img src="${rc.contextPath}/images/rk3.png" style="width:20px;"/>海南省各单位数据质量	
+		</div>
+		<!-- 海南省各单位数据质量 -->
+		<div id="leftDownContent" style="width:838px;height:225px;float:left;">
+			
+		</div>
+	</div>
+	<div style="border-radius:5px;width:217px;height:245px;float:left;margin:0px 3px 3px 0px;backgroundColor:#fff;">
+		<div style="width:100%;height:15%;padding:10px 0px 0px 5px;">
+			<img src="${rc.contextPath}/images/guijiitem.png" style="width:20px"/>计划归集信息项
+		</div>
+		<div id="NOTimputation" style="width:100%;height:80%;overflow-y:scroll;margin:0px 0px 0px 0px;">
+		</div>
+	</div>
+</div>
+<script src="${rc.contextPath}/js/public/echarts.min.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/public/echarts-liquidfill.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/label/corpdepartstatinfo.js?_${date.systemTime}"></script>
+</body>
+</html>

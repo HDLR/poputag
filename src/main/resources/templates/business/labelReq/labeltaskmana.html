@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+</head>
+<link rel="stylesheet" href="${rc.contextPath}/statics/css/timemain.css">
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showTimeAxis">
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+	          <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="标签名称">
+	        </div>
+	        <a class="btn btn-default" @click="query">查询</a>
+			<a class="btn btn-primary" @click="queryInfo"><i class="fa fa-pencil-square-o"></i>&nbsp;查看</a>
+			#if($shiro.hasPermission("label:taskmana:save"))
+			<a class="btn btn-primary" @click="showManaFuc"><i class="fa fa-tasks"></i>&nbsp;标签需求管理</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class='cus-p-diag'>
+    	<div class="panel panel-default cusdialog">
+			<div class="panel-heading">{{title}}</div>
+			<form class="form-horizontal">
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签名称</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.name" readonly placeholder="标签名称"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签描述</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.describe" readonly placeholder="标签描述"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">标签类别</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.type" readonly placeholder="标签类别"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">申请部门</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelReqApply.dep" readonly placeholder="申请部门"/>
+				    </div>
+				</div>
+				<div class="col-sm-2 control-label"></div> 
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+				<br/>
+				<br/>
+				<br/>
+			</form>
+		</div>
+	</div>
+	
+	<div v-show="!showMana" class='cus-p-diag'>
+    	<div class="panel panel-default cusdialog">
+			<div class="panel-heading">标签任务管理</div>
+			<form class="form-horizontal">
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">需求名称</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelTaskMana.applyName" readonly placeholder="标签名称"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">需求管理者</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelTaskMana.username" readonly/>
+				    </div>
+				</div>
+				
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">审核结果</div>
+				   	<div class="col-sm-10">
+				   		<div class="col-sm-12">
+					      	<div class="btn-group">
+							<button class="btn btn-default">{{czName}}</button> 
+							<button data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span></button>
+							<ul class="dropdown-menu">
+								<li><a href="javascript:selectCheck('1')">审核通过</a></li>
+								<li><a href="javascript:selectCheck('2')">审核不通过</a></li>
+								<li><a href="javascript:selectCheck('3')">生产结束</a></li>
+							</ul>
+						</div>
+						</div>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">审核理由</div>
+				   	<div class="col-sm-10">
+				      <input type="text" class="form-control" v-model="labelTaskMana.checkReason" placeholder="审核理由"/>
+				    </div>
+				</div>
+				<div class="form-group">
+				   	<div class="col-sm-2 control-label">生产流程</div>
+				   	<div class="col-sm-10"></div>
+				</div>
+				<div class="form-group" v-for="item in labelTaskMana.processs">
+					<div class="col-sm-2 control-label"></div>
+				   	<div class="col-sm-10">
+				   		<div class="col-sm-1">
+					   		<div class="checkbox">
+								 <input type="checkbox" :id="'process_id_' + item.id"/>
+							</div>
+						</div>
+				   		<div class="col-sm-3">
+				   			<input type="text" class="form-control" v-model="item.time" placeholder="生产时间"/>
+				   		</div>
+				   		<div class="col-sm-8"><textarea class="form-control" v-model="item.process" placeholder="生产描述" rows="1"></textarea></div>
+				   	</div>
+				</div>
+				
+				<div class="col-sm-2 control-label"></div>
+				&nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="add" value="添加生产过程"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="remove" value="删除生产过程"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="保存"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="showMana = true" value="返回"/>
+				<br/>
+				<br/>
+			</form>
+		</div>
+	</div>
+	
+</div>
+
+<script src="${rc.contextPath}/js/labelReq/labeltaskmana.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/labelReq/sjz.js"></script>
+</body>
+</html>

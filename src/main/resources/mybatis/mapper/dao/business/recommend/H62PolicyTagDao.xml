@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.recommend.dao.H62PolicyTagDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PolicyTagEntity" id="BaseResultMap">
+        <result property="tagId" column="tag_id"/>
+        <result property="tagNm" column="tag_nm"/>
+        <result property="tagTypeId" column="tag_type_id"/>
+        <result property="tagDesc" column="tag_desc"/>
+    </resultMap>
+    
+    <select id="queryAllPolicyTags" resultType="hashMap">
+	    SELECT
+			CONCAT('p_', b.tag_type_id) tag_id,
+			b.tag_type_nm name,
+			0 parent_id
+		FROM
+			h62_policy_tag_type b
+		UNION
+			SELECT
+				a.tag_id,
+				a.tag_nm name,
+				CONCAT('p_', a.tag_type_id) parent_id
+			FROM
+				h62_policy_tag a
+    </select>
+    
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h62_policy_tag
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_policy_tag
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="checkTagsName" resultType="hashMap">
+		SELECT
+			a.tag_id,
+			a.tag_nm,
+			b.tag_type_id,
+			b.tag_type_nm
+		FROM
+			h62_policy_tag a
+		LEFT JOIN h62_policy_tag_type b ON a.tag_type_id = b.tag_type_id
+		WHERE
+			a.tag_id IN 
+			<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+				#{item}
+			</foreach> 
+			order by b.tag_type_id, a.tag_id
+	</select>
+</mapper>

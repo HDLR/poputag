@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.labelReq.dao.LabelTaskManaDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.labelReq.entity.LabelTaskManaEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="applyId" column="apply_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="check" column="check"/>
+        <result property="checkReason" column="check_reason"/>
+        <result property="cztime" column="cztime"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from label_task_mana
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from label_task_mana
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

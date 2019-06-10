@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.label.dao.H50TagInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.label.entity.H50TagInfoEntity" id="BaseResultMap">
+        <result property="tagId" column="tag_id"/>
+        <result property="tagNm" column="tag_nm"/>
+        <result property="tagDesc" column="tag_desc"/>
+        <result property="tagTypeCd" column="tag_type_cd"/>
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="enabledDt" column="enabled_dt"/>
+        <result property="disabledDt" column="disabled_dt"/>
+        <result property="activeInd" column="active_ind"/>
+        <result property="unknownInd" column="unknown_ind"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="tagType" column="tag_type"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select 
+			tag_id,tag_nm,tag_desc,
+			enabled_dt,
+			disabled_dt,
+			created_ts,
+			updated_ts,
+			tag_type_cd,tag_ctgy_id,active_ind
+		from h50_tag_info
+		queryList
+        <where>
+        	<if test="tagId != null and tagId.trim() != ''">
+				 `tag_id` like concat('%',#{tagId},'%') 
+			</if>
+			<if test="tagCtgyId != null and tagCtgyId.trim() != ''">
+				 and `tag_ctgy_id` like concat('%',#{tagCtgyId},'%') 
+			</if>
+			<if test="tagNm != null and tagNm.trim() != ''">
+				 and `tag_nm` like concat('%',#{tagNm},'%') 
+			</if>
+			<if test="activeInd != null and activeInd.trim() != ''">
+				 and `active_ind` like concat('%',#{activeInd},'%') 
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h50_tag_info
+        <where>
+        	<if test="tagId != null and tagId.trim() != ''">
+				 `tag_id` like concat('%',#{tagId},'%') 
+			</if>
+			<if test="tagCtgyId != null and tagCtgyId.trim() != ''">
+				 and `tag_ctgy_id` like concat('%',#{tagCtgyId},'%') 
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryAllTags" resultType="hashMap">
+		SELECT
+			a.tag_ctgy_id tag_id,
+			a.tag_ctgy_nm name,
+			a.up_tag_ctgy_id parent_id
+		FROM
+			h50_tag_category_info a
+		UNION
+			SELECT
+				b.tag_id,
+				b.tag_nm,
+				b.tag_ctgy_id parent_id
+			FROM
+				h50_tag_info b
+	</select>
+	
+	<select id="queryAllTagsAndGroupTags" resultType="hashMap">
+		SELECT
+			a.tag_ctgy_id tag_id,
+			a.tag_ctgy_nm name,
+			a.up_tag_ctgy_id parent_id,
+			'TAG' DIF
+		FROM
+			h50_tag_category_info a
+				where a.tag_ctgy_status=2
+		UNION
+			SELECT
+				b.tag_id,
+				b.tag_nm,
+				b.tag_ctgy_id parent_id,
+				'TAG'
+			FROM
+				h50_tag_info b
+					where b.active_ind=1
+			UNION
+				SELECT
+					'P_A',
+					'组合标签',
+					'',
+					'GROUP'
+				FROM
+					DUAL
+				UNION
+					SELECT
+						'A',
+						'组合标签列表',
+						'P_A',
+						'GROUP'
+					FROM
+						DUAL
+					UNION
+						SELECT
+							c.tag_id,
+							c.tag_nm,
+							'A',
+							'GROUP'
+						FROM
+							h50_taggroup_info c
+						where c.active_ind =1
+	</select>
+	
+	<select id="queryTagsData" resultType="hashMap">
+		SELECT
+			c.tag_ctgy_id showparent_id,
+			c.tag_ctgy_nm showparent_nm,
+			b.tag_ctgy_id,
+			b.tag_ctgy_nm,
+			a.tag_id,
+			a.tag_nm
+		FROM
+			h50_tag_info a
+		LEFT JOIN h50_tag_category_info b ON b.tag_ctgy_id = a.tag_ctgy_id
+		LEFT JOIN h50_tag_category_info c ON b.up_tag_ctgy_id = c.tag_ctgy_id 
+		where a.tag_id in 
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="queryTagsAndGroupTagsData" resultType="hashMap">
+		SELECT
+			c.tag_ctgy_id showparent_id,
+			c.tag_ctgy_nm showparent_nm,
+			b.tag_ctgy_id,
+			b.tag_ctgy_nm,
+			a.tag_id,
+			a.tag_nm,
+			null tag_group_content
+		FROM
+			h50_tag_info a
+		LEFT JOIN h50_tag_category_info b ON b.tag_ctgy_id = a.tag_ctgy_id
+		LEFT JOIN h50_tag_category_info c ON b.up_tag_ctgy_id = c.tag_ctgy_id 
+		where a.tag_id in 
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		
+		UNION
+			SELECT
+				'P_A',
+				'组合标签',
+				'A',
+				'组合列表',
+				e.tag_id,
+				e.tag_nm,
+				e.tag_group_content
+			FROM
+				h50_taggroup_info e
+				where e.tag_id in
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="tagUsageByTagId" resultType="int" parameterType="hashmap">
+    	SELECT count(*) FROM h62_campaign_tag_rela t where t.tag_id = #{tag_id} 
+    </select>
+	
+	<select id="queryTagsAndGroupTagsDataByCtgyId" resultType="hashMap">
+		SELECT
+			c.tag_ctgy_id showparent_id,
+			c.tag_ctgy_nm showparent_nm,
+			b.tag_ctgy_id,
+			b.tag_ctgy_nm,
+			a.tag_id,
+			a.tag_nm,
+			null tag_group_content
+		FROM
+			h50_tag_info a
+		LEFT JOIN h50_tag_category_info b ON b.tag_ctgy_id = a.tag_ctgy_id
+		LEFT JOIN h50_tag_category_info c ON b.up_tag_ctgy_id = c.tag_ctgy_id 
+		where a.tag_ctgy_id in 
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		
+		UNION
+			SELECT
+				'P_A',
+				'组合标签',
+				'A',
+				'组合列表',
+				e.tag_id,
+				e.tag_nm,
+				e.tag_group_content
+			FROM
+				h50_taggroup_info e
+				where e.tag_ctgy_id in
+		<foreach item="item" index="index" collection="checkTags" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="getTagInfoByTaList" resultType="hashmap">
+        select
+            tagInfo.tag_id tagId,
+            tagInfo.tag_nm tagNm,
+            tagInfo.tag_ctgy_id tagCtgyId,
+            tagCtgyInfo.tag_ctgy_nm tagCtgyNm
+        from h50_tag_info tagInfo
+        inner join h50_tag_category_info tagCtgyInfo on
+        tagInfo.tag_id in
+        <foreach item="item" index="index" collection="tagList" open="(" separator="," close=")">
+            #{item}
+        </foreach> and
+        tagInfo.tag_ctgy_id = tagCtgyInfo.tag_ctgy_id
+    </select>
+    
+    <select id="queryTagsUsage" resultType="hashmap">
+		SELECT
+			d.showparent_id,
+			d.showparent_nm,
+			d.tag_ctgy_nm,
+			d.tag_nm,
+			d.count,
+			d.groupNm
+		FROM
+			(
+				SELECT
+					e.tag_ctgy_id showparent_id,
+					e.tag_ctgy_nm showparent_nm,
+					c.tag_ctgy_nm,
+					b.tag_nm,
+					a.count,
+					a.tag_id,
+					f.tag_nm groupNm
+				FROM
+					(
+						SELECT
+							t.tag_id,
+							count(1) count
+						FROM
+							h62_campaign_tag_rela t 
+							<if test="tagIds.size > 0">
+								where t.tag_id in 
+								<foreach collection="tagIds" index="index" item="item" open="(" separator="," close=")">
+									#{item}
+								</foreach> 
+							</if>
+						GROUP BY
+							t.tag_id
+						ORDER BY
+							t.tag_id
+					) a
+				LEFT JOIN h50_tag_info b ON a.tag_id = b.tag_id
+				LEFT JOIN h50_tag_category_info c ON b.tag_ctgy_id = c.tag_ctgy_id 
+				LEFT JOIN h50_tag_category_info e ON c.up_tag_ctgy_id = e.tag_ctgy_id 
+				LEFT JOIN h50_taggroup_info f ON f.tag_id = a.tag_id
+			) d
+		WHERE
+			(d.tag_ctgy_nm IS NOT NULL AND d.tag_nm IS NOT NULL) OR d.groupNm is not null
+		order by d.count desc
+		<if test="limit != null and limit != ''">
+			limit 0, 10
+		</if>
+	</select>
+	
+	
+	<!-- 查询标签是否被引用 -->
+	<select id="findCampaignTagRela" resultType="int" parameterType="hashmap">
+		SELECT COUNT(1) FROM h62_campaign_info WHERE camp_id IN (
+		SELECT camp_id FROM h62_campaign_tag_rela 
+		WHERE tag_id = #{tag_id}
+		) 
+	</select>
+	
+	<update id="downLine" parameterType="com.eastern.jinxin.business.label.entity.H50TagInfoEntity">
+		update h50_tag_info  set active_ind=#{activeInd},disabled_dt=#{disabledDt} where tag_id=#{tagId}
+	</update>
+	
+	<update id="upLine" parameterType="com.eastern.jinxin.business.label.entity.H50TagInfoEntity">
+		update h50_tag_info  set active_ind='1',update_user=#{updateUser} where tag_id=#{tagId}
+	</update>
+	
+	<select id="queryNotTagId" resultType="String">
+		SELECT
+			tag_id
+		FROM
+			h50_tag_info t
+		WHERE
+			t.tag_ctgy_id IN (
+				SELECT
+					tag_ctgy_id
+				FROM
+					h50_tag_info t
+				WHERE
+					t.tag_id = #{tagId}
+			)
+		AND tag_id NOT IN (#{tagId})
+	</select>
+</mapper>

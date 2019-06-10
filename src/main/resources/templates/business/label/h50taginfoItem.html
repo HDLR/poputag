@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<link rel="stylesheet" href="${request.contextPath}/statics/css/bootstrap-table.min.css">
+<link rel="stylesheet" href="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.css">
+<script src="${request.contextPath}/statics/libs/bootstrap-table.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.bootstrap3.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.extension.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/tree.table.js"></script>
+<script src="${rc.contextPath}/statics/libs/ajaxupload.js"></script>
+<script src="${rc.contextPath}/js/public/seabox_public.js"></script>
+<script src="${rc.contextPath}/js/public/date.js"></script>
+<style type="text/css"> 
+.prompt_msg {
+	color: red;
+	padding-left: 15px;
+	font-size: 15px;
+}
+
+.prompt_msg>span {
+	margin-right: 10px;
+	margin-left: 15px;
+}
+</style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div class="grid-btn">
+		<div class="col-sm-2">
+				<select  id="tagLevel" class="form-control" v-model="q.tagLevelUpload">
+		    	</select>
+		</div>
+		<div class="col-sm-1" style="width:110px">
+				<select  class="form-control" v-model="q.tagStatusUpload" >
+		    			<option value="">全部</option>
+		    			<option value="2">启用</option>
+		    			<option value="0">禁用</option>
+		    	</select>
+		</div>
+		<div class="col-sm-2">
+				<input type="text" class="form-control" v-model="q.tagNameUpload" @keyup.enter="select" placeholder="标签名称">
+		</div>
+		<div class="col-sm-3">
+			<input type="text" id="beginEndDate" class="form-control"  @keyup.enter="select" placeholder="创建起止时间">
+		</div>
+		<a class="btn btn-default" @click="select">查询</a>
+		<!-- Single button -->
+		<div class="btn-group">
+		  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		    	用户操作 <span class="caret"></span>
+		  </button>
+		  <ul class="dropdown-menu">
+		    <li>
+		    	#if($shiro.hasPermission("h50taginfo:save"))
+		        <a  @click="addTag">
+		          <i class="fa fa-plus"></i>
+		          &nbsp;新增
+		        </a>
+		        #end
+		    </li>
+		    <li>
+		    	#if($shiro.hasPermission("h50taginfo:info"))
+		        <a  @click="query">
+		          <i class="fa fa-pencil-square-o"></i>
+		          &nbsp;查看
+		        </a>
+		         #end
+		    </li>
+		    <li>
+		    	#if($shiro.hasPermission("h50taginfo:update"))
+		        <a  @click="update">
+		          <i class="fa fa-pencil-square-o"></i>
+		          &nbsp;修改
+		        </a>
+		         #end
+		    </li>
+		    <li>
+		    	 #if($shiro.hasPermission("h50taginfo:delete"))
+		        <a  @click="del">
+		          <i class="fa fa-trash-o"></i>
+		          &nbsp;删除
+		        </a>
+		         #end
+		    </li>
+		    <li role="separator" class="divider"></li>
+		    <li>
+		    	#if($shiro.hasPermission("h50taginfo:up"))
+		        <a  @click="upLine">
+		          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>上线
+		        </a>
+		         #end
+		    </li>
+		    <li>
+		    	#if($shiro.hasPermission("h50taginfo:down"))
+		        <a  @click="downLine">
+		          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>下线
+		        </a>
+		         #end
+		    </li>
+		    <li>
+		    	#if($shiro.hasPermission("manager:outputExcel"))
+		        <a  @click="outSelected">
+		           <span class="glyphicon glyphicon-export" aria-hidden="true"></span>导出
+		        </a>
+		         #end
+		    </li>
+		    <li>
+		    	#if($shiro.hasPermission("manager:inputExcel"))
+		        <a  id="upload">
+		          <span class="glyphicon glyphicon-import" aria-hidden="true"></span>导入
+		        </a>
+		         #end
+		    </li>
+		  </ul>
+		</div>
+      </div>
+	<div id="left_body" class="tag_tree">
+		<<div class="col-sm-3">
+			<ul id="tagTree" class="ztree"></ul>
+		</div>
+	    
+	</div>
+	<div id="right_body" style="overflow: auto;">
+	  <table id="jqGrid"></table>
+      <div id="jqGridPager"></div>
+	</div>
+	<!-- 添加标签项 -->
+    <div v-show="!showList" class='cus-p-diag'>
+      <div class="panel panel-default cusdialog">
+        <div class="panel-heading">
+         <span class="title_label">{{title}}</span>
+         <input type="button" class="btn btn-warning btn-close"  @click="closed"  value="返回" />
+        </div>
+       
+        <form class="form-horizontal">
+          
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">标签ID</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" v-model="h50TagInfo.tagId" maxlength="10" :disabled="readonlyFlag" placeholder="请输入标签的ID" />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-2 control-label">标签名称</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" v-model="h50TagInfo.tagNm" placeholder="请输入标签的名称" :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-2 control-label">符合标签的人数</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" v-model="h50TagInfo.personNumbers"  :disabled="true"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">标签类别代码</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" v-model="h50TagInfo.tagDesc" placeholder="请输入标签类别的代码" :disabled="queryFlag"/>
+            </div>
+          </div>
+         
+          <div class="form-group">
+            <div class="col-sm-2 control-label">选择上级标签</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control"  style="cursor: pointer;" v-model="menu.parentName" @click="menuTree" :disabled="readonlyFlag" readonly="readonly" />
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">标签描述</div>
+            <div class="col-sm-10">
+             		<select  class="form-control" v-model="h50TagInfo.tagTypeCd" :disabled="readonlyFlag">
+		    			<option value="A">A</option>
+		    		</select>
+            </div>
+          </div>
+           <div   class="form-group">
+            <div class="col-sm-2 control-label">是否为未知标签</div>
+            <div class="col-sm-10">
+             		<select  class="form-control" v-model="h50TagInfo.unknownInd" :disabled="readonlyFlag">
+		    			<option value="0">否</option>
+		    		</select>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">启用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50TagInfo.enabledDt" placeholder="选择启用日期" :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">停用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50TagInfo.disabledDt" placeholder="选择停用日期" :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">状态</div>
+            <div class="col-sm-10">
+              <select  class="form-control" v-model="h50TagInfo.activeInd" :disabled="true">
+	    			<option value="1">启用</option>
+	    			<option value="0" >禁用</option>
+	    	 </select>
+            </div>
+          </div>
+        </form>
+        <div class="form-group">
+          <div class="col-sm-2 control-label"></div>
+          <div v-if="!queryFlag">
+          	 <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" />
+          &nbsp;&nbsp;
+         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+		  </div>
+		  <div v-if="queryFlag">
+         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+		  </div>
+        </div>
+      </div>
+    </div>
+    
+     <div v-show="!showInputRes" class='cus-p-diag'>
+      <div class="panel panel-default cusdialog">
+        <div class="panel-heading">
+        	<span class="title_label">{{title}}</span>
+         <input type="button" class="btn btn-warning btn-close"  @click="closed"  value="返回" />
+        </div>
+        <form class="form-horizontal">
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">  
+            	 总共:{{res.all}}条
+            </div>
+            <div class="col-sm-10">
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">   成功:{{res.success}}条</div>
+            <div class="col-sm-10">
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">   失败:{{res.fail}}条</div>
+            <div class="col-sm-10">
+            </div>
+          </div>
+			<hr class="layui-bg-orange">
+          <div  class="form-group" v-for="tip in res.tips">
+	            <div class="col-sm-2 control-label"></div>
+	            <div class="col-sm-10">
+	           		   {{tip}}
+	            </div>
+          </div>
+
+        </form>
+        <div class="form-group">
+          <div class="col-sm-2 control-label"></div>
+         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+        </div>
+      </div>
+    </div>     
+    
+     <div v-show="!outputSelect" class='cus-p-diag'>
+      <div class="panel panel-default cusdialog">
+        <div class="panel-heading">
+        	<span class="title_label">{{title}}</span>
+         <input type="button" class="btn btn-warning btn-close"  @click="closed"  value="返回" />
+        	
+        
+        </div>
+        <form class="form-horizontal">
+        
+        </form>
+        <div class="form-group">
+          <div class="col-sm-2 control-label"></div>
+         	 <input type="button" class="btn btn-warning" @click="output('all')" value="导出全部" />
+         	 <input type="button" class="btn btn-warning" @click="output('list')" value="导出查询列表" />
+        </div>
+      </div>
+    </div>     
+</div>
+  <!-- 选择菜单 -->
+  <div id="menuLayer" style="display: none; padding: 10px;">
+    <ul id="menuTree" class="ztree"></ul>
+  </div>
+<script src="${rc.contextPath}/js/label/h50taginfoItem.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/statics/plugins/laydate/laydate.js"></script>
+<script>
+	laydate.render({
+	  elem: '#beginEndDate'
+	  ,range: '~'
+	});
+</script>
+</body>
+</html>

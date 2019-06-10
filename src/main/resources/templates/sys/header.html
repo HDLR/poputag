@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" th:href="@{/statics/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/statics/font-awesome-4.7.0/css/font-awesome.min.css}" />
+<link rel="stylesheet" th:href="@{/statics/plugins/jqgrid/ui.jqgrid-bootstrap.css}" />
+<link rel="stylesheet" th:href="@{/statics/plugins/ztree/css/metroStyle/metroStyle.css}" />
+<link rel="stylesheet" th:href="@{/statics/css/main.css}" />
+<link rel="stylesheet" th:href="@{/statics/css/main2.css}" />
+<link rel="stylesheet" th:href="@{/statics/css/cusExt.css}" />
+<link rel="stylesheet" th:href="@{/statics/plugins/treegrid/jquery.treegrid.css}" />
+
+<script th:src="@{/statics/plugins/laydate/laydate.js}"></script>
+<script th:src="@{/statics/libs/jquery.min.js}"></script>
+<script th:src="@{/statics/plugins/layer/layer.js}"></script>
+<script th:src="@{/statics/libs/bootstrap.min.js}"></script>
+<script th:src="@{/statics/libs/vue.min.js}"></script>
+<script th:src="@{/statics/plugins/jqgrid/grid.locale-cn.js}"></script>
+<script th:src="@{/statics/plugins/jqgrid/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/statics/plugins/ztree/jquery.ztree.all.min.js}"></script>
+<script th:src="@{/statics/js/common.js}"></script>
+<script th:src="@{/statics/js/public/tag_public.js}"></script>
+
+<script type="text/javascript" th:inline="javascript">
+	var ctxPath = [[${ctxPath}]];
+	var viewParams = [[${viewParams}]];
+	var yearNeed = [[${yearNeed}]];
+</script>
+</head>
+
+<body> 
+	<div id="publicmask" class="publicmask" style="display: none;">
+	  <div id="loaderdoing"></div>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+package ${package}.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+
+
+import ${package}.entity.${className}Entity;
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public interface ${className}Dao  extends BaseMapper<${className}Entity> {
+	List<${className}Entity> queryList(Pagination page, Map<String, Object> map);
+	int queryTotal(Map<String, Object> map);
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.labelReq.dao.WebserviceConfDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.labelReq.entity.WebserviceConfEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="apiName" column="api_name"/>
+        <result property="url" column="url"/>
+        <result property="method" column="method"/>
+        <result property="reqParams" column="req_params"/>
+        <result property="returnRes" column="return_res"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="createUser" column="create_user"/>
+    </resultMap>
+    
+    <resultMap type="com.eastern.jinxin.business.labelReq.entity.WebserviceConfEntity" id="BaseResultMap2">
+        <result property="id" column="id"/>
+        <result property="apiName" column="api_name"/>
+        <result property="url" column="url"/>
+        <result property="method" column="method"/>
+        <result property="reqParams" column="req_params"/>
+        <result property="returnRes" column="return_res"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="createUser" column="create_user"/>
+        <result property="username" column="username"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap2">
+		select a.*, b.username from webservice_conf a 
+		left join sys_user b on b.user_id = a.create_user
+        <where>
+			<if test="apiName != null and apiName.trim() != ''">
+			 	api_name like concat('%',#{apiName},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from webservice_conf
+        <where>
+			<if test="apiName != null and apiName.trim() != ''">
+			 	api_name like concat('%',#{apiName},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryAll" resultMap="BaseResultMap">
+		select a.* from webservice_conf a 
+	</select>
+</mapper>

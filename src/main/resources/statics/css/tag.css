@@ -1,0 +1,176 @@
+
+
+	.sprite-img-market_icon {
+		width: 52px;
+		height: 52px;
+		display: inline-block;
+	}
+
+
+	.grid-item {
+		width: 49%;
+		margin-bottom: 20px;
+	}
+
+	.gutter-sizer {
+		width: 10px;
+	}
+
+	.grid {
+		max-width: 1264px;
+		min-width: 1250px;
+	}
+
+	div>a:hover {
+	    background-color: #6CABF6;
+	}
+
+	.div_grid_cell_div_0 {
+		width:auto;
+		height:auto;
+		float:left;
+		border-width: 1px; border-color: #1b6d85;		border-style:none;  /* for debug */
+	}
+
+	.left_hide_margin_div_0_1 {
+		width: 20px;  /*  left space length = 40 */
+		height:100%;
+		float: left;
+		border-width: 1px; border-color: #1b6d85;		border-style:none;  /* for debug */
+	}
+
+	.right_body_div_0_2_before {
+		float:left;
+		width: 590px;   /*  right part body = div_grid_cell_div_0 - space_div */
+		border-width: 1px; border-color: #E4E4E4;   border-style:solid;  /* this border is required for product */
+	    border-radius: 0px;
+	}
+	.right_body_div_0_2 {
+		margin-right: 4px;
+   		margin-bottom: 3px;
+		float:left;
+		width: 566px;   /*  right part body = div_grid_cell_div_0 - space_div */
+		border-width: 1px; border-color: #E4E4E4;   border-style:solid;  /* this border is required for product */
+	    border-radius: 0px;
+	}
+
+	.l1_icon_and_text_div_0_2_1 {
+		width: 103px;   /*  body.l1_text_icon = 103px */
+		height:100%;
+		float:left;
+		text-align: center;
+		border-width: 1px; border-color: #1b6d85;		border-style:none;  /* for debug */
+	}
+
+	.l1_icon_div_0_2_1_A {
+		width: 100%;
+		height: auto;
+		padding-left: 20px;
+		padding-right: 30px;
+		padding-top: 20px;
+	}
+
+	.l1_text_div_0_2_1_B {
+		width: 100%;
+		height: auto;
+		padding-bottom: 20px;
+		font-weight: bold;
+		font-size: 14px;
+		color: #132851;
+		text-align: left;
+		padding-left: 20px;
+	}
+
+	.l2_l3_text_div_0_2_2 {
+		width: 460px;  /*  body.l2_l3 = right_body_div_0_2 - l1_icon_and_text_div_0_2_1 -2px(border) = 486px */
+		height:100%;
+		border-radius: 0px;
+		float: right ;
+		padding-top: 0px; margin-top: 0px;
+		border-width: 1px; border-color: #1b6d85;		border-style:none;  /* for debug */
+	}
+	
+	.l2_l3_text_div_0_2_2_before {
+		width: 484px;  /*  body.l2_l3 = right_body_div_0_2 - l1_icon_and_text_div_0_2_1 -2px(border) = 486px */
+		height:100%;
+		border-radius: 0px;
+		float: right ;
+		padding-top: 0px; margin-top: 0px;
+		border-width: 1px; border-color: #1b6d85;		border-style:none;  /* for debug */
+	}
+
+
+	.one_line_l2_l3_top_margin_div_0_2_2_A {
+		width: 100%;
+		height:10px;
+		float:left ;
+		padding-top: 0px; margin-top: 0px;
+		border-width: 1px; border-color: #0fe8f5;		border-style:none;  /* for debug */
+	}
+
+
+	.one_line_l2_l3_add_more_margin_div_0_2_2_A {
+		width: 100%;
+		height:0px;  /* no need add more margin when only 1 line of L2_l3 exists */
+		float:left ;
+		padding-top: 0px; margin-top: 0px;
+		border-width: 1px; border-color: #0fe8f5;		border-style:none;  /* for debug */
+	}
+
+	.one_line_l2_and_l3_div_0_2_2_B {
+		width: 460px;
+		height: auto;
+		float:left ;
+		padding-top: 0px; margin-top: 0px;
+		border-width: 1px; border-color: #00bf00;		border-style:none;  /* for debug */
+	}
+
+	.one_line_l2_part_div_0_2_2_B_1 {
+		width: 80px; height:auto;  /* right.l2 80px */
+		float:left ;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		border-width: 1px; border-color: #00bf00;		border-style:none;  /* for debug */
+	}
+
+	.one_line_l3_part_div_0_2_2_B_2 {
+		width: 460px; height:auto;  /* right.l3 =  l2_l3_text_div_0_2_2 - one_line_l2_part_div_0_2_2_B_1 - 2px(border) = 400px */
+		float:left;
+		text-align: left;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		border-width: 1px; border-color: #002a80;		border-style:none;  /* for debug */
+	}
+	
+	.one_line_l3_part_div_0_2_2_B_2_before {
+		width: 400px; height:auto;  /* right.l3 =  l2_l3_text_div_0_2_2 - one_line_l2_part_div_0_2_2_B_1 - 2px(border) = 400px */
+		float:left;
+		text-align: left;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		border-width: 1px; border-color: #002a80;		border-style:none;  /* for debug */
+	}
+
+    .one_line_l2_l3_bottom_margin_div_0_2_2_C {
+		width: 100%;
+		height:25px;
+		float:left ;
+		border-width: 1px; border-color: #0fe8f5;		border-style:none;  /* for debug */
+    }
+
+	.l2_text {
+		font-weight: bold;
+		font-size: 14px;
+		color: #333333;
+	}
+
+	.l3_text {
+		font-weight: normal;
+		font-size: 14px;
+		color: #333333;
+	}
+
+	.virtual_hide_table_cell {
+		border-color: transparent; border-width: 0px; border-style:none;
+	}
+

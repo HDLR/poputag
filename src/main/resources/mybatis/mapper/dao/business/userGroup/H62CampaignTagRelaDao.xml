@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.userGroup.dao.H62CampaignTagRelaDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.userGroup.entity.H62CampaignTagRelaEntity" id="BaseResultMap">
+        <result property="campId" column="camp_id"/>
+        <result property="tagGroupSeq" column="tag_group_seq"/>
+        <result property="tagId" column="tag_id"/>
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+    </resultMap>
+    
+    <insert id="insertH62CampaignTagRela" parameterType="com.eastern.jinxin.business.userGroup.entity.H62CampaignTagRelaEntity">
+    	INSERT INTO h62_campaign_tag_rela (camp_id, tag_group_seq, tag_id, tag_ctgy_id, created_ts, updated_ts) 
+    	VALUES 
+    	(#{campId}, #{tagGroupSeq}, #{tagId}, #{tagCtgyId}, #{createdTs}, #{updatedTs})
+    </insert>
+    
+    <select id="queryH62CampaignTagRela" resultType="hashMap">
+    	SELECT
+			t.*
+		FROM
+			(
+				SELECT
+					c.tag_ctgy_id showparent_id,
+					c.tag_ctgy_nm showparent_nm,
+					a.tag_ctgy_id,
+					b.tag_ctgy_nm,
+					a.tag_id,
+					d.tag_nm,
+					NULL tag_group_content
+				FROM
+					h62_campaign_tag_rela a
+				LEFT JOIN h50_tag_category_info b ON a.tag_ctgy_id = b.tag_ctgy_id
+				LEFT JOIN h50_tag_info d ON a.tag_id = d.tag_id
+				LEFT JOIN h50_tag_category_info c ON b.up_tag_ctgy_id = c.tag_ctgy_id
+				WHERE
+					a.camp_id = #{campId}
+				UNION
+					SELECT
+						'P_A' showparent_id,
+						'组合标签' showparent_nm,
+						'A' tag_ctgy_id,
+						'组合标签列表' tag_ctgy_nm,
+						e.tag_id,
+						e.tag_nm,
+						e.tag_group_content
+					FROM
+						h50_taggroup_info e
+					WHERE
+						e.tag_id IN (
+							SELECT
+								f.tag_id
+							FROM
+								h62_campaign_tag_rela f
+							WHERE
+								f.camp_id = #{campId}
+						)
+			) t
+		WHERE
+			t.showparent_id IS NOT NULL;
+    </select>
+    
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h62_campaign_tag_rela
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_campaign_tag_rela
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

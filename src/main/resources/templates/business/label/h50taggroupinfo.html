@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<script src="${rc.contextPath}/js/public/date.js"></script>
+<link rel="stylesheet" href="${request.contextPath}/statics/plugins/layui/css/layui_new.css">
+<link rel="stylesheet" href="${request.contextPath}/statics/css/tag.css">
+</head>
+
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("h50taggroupinfo:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("h50taggroupinfo:info"))
+			<a class="btn btn-primary" @click="select"><i class="fa fa-plus"></i>&nbsp;查看</a>
+			#end
+			#if($shiro.hasPermission("h50taggroupinfo:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("h50taggroupinfo:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    <div v-show="!showList" class='cus-p-diag'>
+    <div  class="panel panel-default">
+		<div class="panel-heading">
+		 <span class="title_label">{{title}}</span>
+         <input type="button" class="btn btn-warning btn-close"  @click="closed"  value="返回" />
+		
+		</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">组合标签人数</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="h50TaggroupInfo.tagHasPersonCount"  readonly="readonly"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">标签id</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="h50TaggroupInfo.tagId" placeholder="标签ID" :disabled="readonlyFlag"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">标签名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="h50TaggroupInfo.tagNm" placeholder="标签名称" :disabled="queryFlag"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">标签描述</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="h50TaggroupInfo.tagDesc" placeholder="标签描述" :disabled="queryFlag"/>
+			    </div>
+			</div>
+			<div v-if="opType == 'add' ||opType == 'update'" class="form-group">
+	            <div class="col-sm-2 control-label">选择标签</div>
+	            <div class="col-sm-10">
+	              <input type="text" class="form-control" style="cursor: pointer;" v-model="menu.parentName" @click="menuTree" readonly="readonly"  />
+	            </div>
+          	</div>
+          	
+			<div v-if="opType == 'add' ||opType == 'update'" class="form-group" >
+			   	<div class="col-sm-2 control-label"></div>
+			   	<fieldset class='layui-elem-field site-demo-button' style='margin-top: 5px;width:800px' >
+			   		<legend  style="display: block;width:100px !important;padding: 0;margin-bottom: 5px;font-size: 21px;line-height: inherit;color: #333;border: 0;">含有标签</legend> 
+			   		
+			   		<div class="form-group" >
+					   	<div class="col-sm-2 control-label"></div>
+					   	<div class="col-sm-12" >
+					   		<!-- <a class="btn btn-primary" @click="addTag(tag)">
+					   		<i class="fa fa-pencil-square-o" ></i>&nbsp;{{tag.showparent_nm}}：【{{tag.tag_ctgy_nm}}：{{tag.tag_nm}}】
+					   		</a> -->
+						   	<a style="margin:3px 5px 0px 0px;" v-for="tag in h50TaggroupInfo.tags" @click="addTag(tag)" class='btn btn-primary' >
+						   	{{tag.showparent_nm}}：【{{tag.tag_ctgy_nm}}：{{tag.tag_nm}}】
+						   	</a>
+					   	</div>
+					</div>
+			   	</fieldset>
+			</div>
+          	
+			<div v-if="opType == 'add' ||opType == 'update'" class="form-group" >
+			   	<div class="col-sm-2 control-label">条件</div>
+			   	<div class="col-sm-10">
+			   		<input class="btn btn-primary" @click="operator('(')" type='button' value='('>
+			   		<input class="btn btn-primary" @click="operator(')')" type='button' value=')'>
+			   		<input class="btn btn-primary" @click="operator('+')" type='button' value='AND'>
+			   		<input class="btn btn-primary" @click="operator('|')" type='button' value='OR'>
+			   		<input class="btn btn-primary" @click="operator('!')" type='button' value='NOT'>
+			   	</div>
+			</div>
+			
+			<div class="form-group">
+		        <div class="col-sm-2 control-label">替换状态</div> 
+		        <label class="radio-inline">
+		          <input type="radio" name="replace" value="0" v-model="replace"/> 禁用
+		        </label>
+		        <label class="radio-inline">
+		          <input type="radio" name="replace" value="1" v-model="replace"/> 启用
+		        </label>
+		    </div>
+			
+			<div class="form-group" >
+			   	<div class="col-sm-2 control-label"></div>
+			   	<div class="col-sm-10">
+			   		<input type="text" class="form-control"   readonly="readonly" placeholder="例：1000182 AND 1000183 OR ( 1000183 OR 1000184 ) NOT 1000185"/>
+			   		
+			   	</div>
+			</div>
+			<div class="form-group" >
+			   	<div class="col-sm-2 control-label"></div>
+			   	<fieldset class='layui-elem-field site-demo-button' style='margin-top: 5px;width:800px' >
+			   		<legend  style="display: block;width:100px !important;padding: 0;margin-bottom: 5px;font-size: 21px;line-height: inherit;color: #333;border: 0;">组合结果</legend> 
+			   		<div class="form-group" >
+					   	<div class="col-sm-2 control-label"></div>
+						<div class="col-sm-12" id="group_content">
+			   			</div>
+					</div>
+			   	</fieldset>
+			</div>
+		   <div  class="form-group">
+            <div class="col-sm-2 control-label">标签类别描述</div>
+            <div class="col-sm-10">
+             		<select  class="form-control" v-model="h50TaggroupInfo.tagTypeCd" :disabled="readonlyFlag">
+		    			<option value="A">A</option>
+		    		</select>
+            </div>
+          </div>
+		  <div  class="form-group">
+            <div class="col-sm-2 control-label">启用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50TaggroupInfo.enabledDt" placeholder="选择启用日期" :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">停用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50TaggroupInfo.disabledDt" placeholder="选择停用日期" :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">状态</div>
+            <div class="col-sm-10">
+              <select  class="form-control" v-model="h50TaggroupInfo.activeInd" :disabled="queryFlag">
+	    			<option value="2">启用</option>
+	    			<option value="0" >禁用</option>
+	    	 </select>
+            </div>
+          </div>
+			
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<div v-if="!queryFlag">
+			          	 <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" />
+			          &nbsp;&nbsp;
+			         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+					  </div>
+					  <div v-if="queryFlag">
+			         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+				 </div>
+			</div>
+		</form>
+	</div>
+</div>
+</div>
+
+	<!-- 选择菜单 -->
+  <div id="menuLayer" style="display: none; padding: 10px;">
+    <ul id="menuTree" class="ztree"></ul>
+  </div>
+
+<script src="${rc.contextPath}/js/label/h50taggroupinfo.js?_${date.systemTime}"></script>
+</body>
+</html>

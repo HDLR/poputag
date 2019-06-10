@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:include="sys/header.html::head"></head>
+<body th:include="sys/header.html::body"></body>
+<script th:src="@{/statics/js/public/date.js}"></script>
+</head>
+<body>
+  <div id="rrapp" v-cloak=""> 
+   <div v-show="showList"> 
+    <div class="grid-btn"> 
+     <div class="form-group col-sm-2"> 
+      <input type="text" class="form-control" v-model="q.menuName" @keyup.enter="query" placeholder="首页菜单名称" /> 
+     </div> 
+     <a class="btn btn-default" @click="query">查询</a>
+     #if($shiro.hasPermission("syshomepagemanager:save")) 
+     <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+     #end 
+     #if($shiro.hasPermission("syshomepagemanager:update")) 
+     <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+     #end 
+     #if($shiro.hasPermission("syshomepagemanager:delete")) 
+     <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+     #end 
+    </div> 
+    <table id="jqGrid"></table> 
+    <div id="jqGridPager"></div> 
+   </div> 
+   <div v-show="!showList" class="cus-p-diag"> 
+    <div class="panel panel-default"> 
+     <div class="panel-heading"> 
+      <span class="title_label">{{title}}</span> 
+      <input type="button" class="btn btn-warning btn-close" @click="closed" value="返回" /> 
+     </div> 
+     <form class="form-horizontal"> 
+     
+    <!--   <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        选择用户
+       </div> 
+       <div class="col-sm-10"> 
+        <select id="userId" class="form-control" v-model="sysHomepageManager.userId"> </select> 
+       </div> 
+      </div>  -->
+      <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        选择首页
+       </div> 
+       <div class="col-sm-10"> 
+        <input type="text" class="form-control" style="cursor: pointer;" v-model="menu.parentName" @click="menuTree" readonly="readonly" placeholder="请选择首页" /> 
+       </div> 
+      </div> 
+       <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        选择角色
+       </div> 
+       <div class="col-sm-10"> 
+        <!-- <select id="roleId" class="form-control" v-model="sysHomepageManager.roleId" > </select> -->
+        <select v-model="sysHomepageManager.roleId" class="form-control">
+		  <option v-for="option in options" v-bind:value="option.value">
+		    {{ option.text }}
+		  </option>
+		</select>
+       </div> 
+      </div> 
+      <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        启用日期
+       </div> 
+       <div class="col-sm-10"> 
+        <input type="date" class="form-control" v-model="sysHomepageManager.enableDate" /> 
+       </div> 
+      </div> 
+      <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        禁用日期
+       </div> 
+       <div class="col-sm-10"> 
+        <input type="date" class="form-control" v-model="sysHomepageManager.disableDate" /> 
+       </div> 
+      </div> 
+      <div class="form-group"> 
+       <div class="col-sm-2 control-label">
+        状态
+       </div> 
+       <div class="col-sm-10"> 
+        <select class="form-control" v-model="sysHomepageManager.status">
+         	<option value="1" select="selected" >启用</option>
+          	<option value="0">禁用</option>
+        </select> 
+       </div> 
+      </div> 
+      <div class="form-group"> 
+       <div class="col-sm-2 control-label"></div> 
+       <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" /> &nbsp;&nbsp; 
+       <input type="button" class="btn btn-warning" @click="closed" value="返回" /> 
+      </div> 
+     </form> 
+    </div> 
+   </div> 
+  </div> 
+  <!-- 选择菜单 --> 
+  <div id="menuLayer" style="display: none; padding: 10px;"> 
+   <ul id="menuTree" class="ztree"></ul> 
+  </div>
+  <script th:src="@{/statics/js/sys/syshomepagemanager.js}"></script>
+</body>
+</html>

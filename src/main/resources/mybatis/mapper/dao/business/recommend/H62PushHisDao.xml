@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.recommend.dao.H62PushHisDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PushHisEntity" id="BaseResultMap">
+        <result property="hisId" column="his_id"/>
+        <result property="hisSuccess" column="his_success"/>
+        <result property="tempId" column="temp_id"/>
+        <result property="hisFail" column="his_fail"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="hisStatu" column="his_statu"/>
+        <result property="pushId" column="push_id"/>
+    </resultMap>
+    
+    <select id="queryListMap" resultType="hashMap">
+		SELECT
+			ph.his_id,
+			(ph.his_success + ph.his_fail) his_counts,
+			ph.his_success,
+			ph.his_fail,
+			ppt.temp_nm,
+			ph.his_statu,
+			ph.create_dt,
+			su.username,
+			pp.push_nm
+		FROM
+			h62_push_his ph,
+			h62_policy_push_temp ppt,
+			sys_user su,
+			h62_policy_push pp
+		WHERE
+			ph.temp_id = ppt.temp_id
+		AND ph.create_user = su.user_id
+		AND ph.push_id = pp.push_id
+		ORDER BY
+			ph.his_id DESC
+	</select>
+	
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h62_push_his
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_push_his
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="getTest" resultType="hashmap">
+		select *  from h62_sms_test
+    </select>
+</mapper>

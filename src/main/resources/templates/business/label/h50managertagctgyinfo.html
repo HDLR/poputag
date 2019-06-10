@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<script src="${rc.contextPath}/js/public/date.js"></script>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			#if($shiro.hasPermission("h50managertagctgyinfo:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("h50managertagctgyinfo:info"))
+			<a class="btn btn-primary" @click="select"><i class="fa fa-plus"></i>&nbsp;查看</a>
+			#end
+			#if($shiro.hasPermission("h50managertagctgyinfo:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("h50managertagctgyinfo:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    <div v-show="!showList" class='cus-p-diag'>
+    <div  class="panel panel-default">
+		<div class="panel-heading">
+			<span class="title_label">{{title}}</span>
+        	<input type="button" class="btn btn-warning btn-close"  @click="closed"  value="返回" />
+			
+		</div>
+		<form class="form-horizontal">
+			<div class="form-group">
+	            <div class="col-sm-2 control-label">选择标签</div>
+	            <div class="col-sm-10">
+	              <input type="text" class="form-control" style="cursor: pointer;" v-model="menu.parentName" @click="menuTree" readonly="readonly" :disabled="queryFlag" />
+	            </div>
+          	</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">描述</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="h50ManagerTagctgyinfo.desc" placeholder="" :disabled="queryFlag"/>
+			    </div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-2 control-label">角色</div>
+		            <div class="col-sm-10">
+		              <select  id="roleId" class="form-control" v-model="h50ManagerTagctgyinfo.roleId" :disabled="queryFlag">
+			    	 </select>
+	            </div>
+			</div>
+			
+			 <div  class="form-group">
+            <div class="col-sm-2 control-label">启用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50ManagerTagctgyinfo.enabledDt"  :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">禁用日期</div>
+            <div class="col-sm-10">
+              <input type="date"  class="form-control" v-model="h50ManagerTagctgyinfo.disabledDt"  :disabled="queryFlag"/>
+            </div>
+          </div>
+          <div  class="form-group">
+            <div class="col-sm-2 control-label">状态</div>
+            <div class="col-sm-10">
+              <select  class="form-control" v-model="h50ManagerTagctgyinfo.status" :disabled="queryFlag">
+	    			<option value="2">启用</option>
+	    			<option value="0" >禁用</option>
+	    	 </select>
+            </div>
+          </div>
+          
+           <div  class="form-group">
+            <div class="col-sm-2 control-label">是否可见</div>
+            <div class="col-sm-10">
+              <select  class="form-control" v-model="h50ManagerTagctgyinfo.showFlag" :disabled="queryFlag">
+	    			<option value="2">可见</option>
+	    			<option value="0" >不可见</option>
+	    	 </select>
+            </div>
+          </div>
+			<div class="form-group">
+			
+				<div class="col-sm-2 control-label"></div> 
+				<div v-if="!queryFlag">
+			          	 <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" />
+			          &nbsp;&nbsp;
+			         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+					  </div>
+					  <div v-if="queryFlag">
+			         	 <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+				 </div>
+			</div>
+		</form>
+	</div>
+	</div>
+</div>
+
+ <!-- 选择菜单 -->
+  <div id="menuLayer" style="display: none; padding: 10px;">
+    <ul id="menuTree" class="ztree"></ul>
+  </div>
+
+<script src="${rc.contextPath}/js/label/h50managertagctgyinfo.js?_${date.systemTime}"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.sys.operation.homepage.dao.SysHomepageManagerDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.sys.operation.homepage.entity.SysHomepageManagerEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="menuId" column="menu_id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="roleId" column="role_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="status" column="status"/>
+        <result property="enableDate" column="enable_date"/>
+        <result property="disableDate" column="disable_date"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select a.create_date,
+				a.disable_date,
+				a.enable_date,
+				a.id,
+				a.menu_id,
+				a.menu_name,
+				a.role_id,
+				a.`status`,
+				a.update_date,
+				b.role_name roleName
+ 		from sys_homepage_manager a left join sys_role  b 
+ 		on a.role_id=b.role_id
+        <where>
+			<if test="menuName != null and menuName.trim() != ''">
+			 	a.menu_name like concat('%',#{menuName},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_homepage_manager
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="getHomepageByUserRole" resultType="String">
+		SELECT
+			url 
+		FROM
+			sys_homepage_manager a
+		LEFT JOIN sys_menu b ON a.menu_id = b.menu_id
+			where 
+				a.role_id in (select role_id from sys_user_role a where 
+				a.user_id= #{roleId} )
+				and a.`status`=1
+				and a.disable_date &gt; NOW()
+				and a.enable_date &lt; NOW()
+			order by role_id 
+		LIMIT 0,1
+	</select>
+</mapper>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eastern.jinxin.business.label.dao.CorpDepartStatInfoDao">
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.label.entity.CorpDepartStatInfoEntity" id="BaseResultMap">
+        <result property="departName" column="depart_name"/>
+        <result property="departFlag" column="depart_flag"/>
+        <result property="tableName" column="table_name"/>
+        <result property="tableNameZh" column="table_name_zh"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from popu_depart_stat_info
+        <where>
+			<if test="departName != null and departName.trim() != ''">
+			 	depart_name like concat('%',#{departName},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from popu_depart_stat_info
+        <where>
+			<if test="departName != null and departName.trim() != ''">
+			 	depart_name like concat('%',#{departName},'%')
+			</if>
+		</where>
+	</select>
+	
+	<!-- 海南省各单位数据归集状况  用于图像展示  -->
+	<select id="getDepTableCount" resultType="hashmap">
+		SELECT
+			src_depart departName,
+			count(information_item) baseItem,
+			max(item_rec) recordCount
+		FROM
+			popu_integrity_show
+		GROUP BY
+			src_depart
+		ORDER BY
+			1,
+			2 DESC;
+	</select>
+	
+	<!-- 数据质量占比查询 -->
+	<select id="getDepDataPercent" resultType="hashmap">
+		SELECT
+				c.depart_name DepartName,
+				sum(
+					CASE
+					WHEN task_name LIKE '%主键重复检查'
+					OR task_name LIKE '%重复主键检查' THEN
+						(
+							Target_Table_Row_Count - Result5
+						)
+					WHEN task_name LIKE '%非空校验'
+					OR task_name LIKE '%标准代码检查'
+					OR task_name LIKE '%非空检查' 
+					or task_name LIKE '%数据比对'
+					or task_name LIKE '%姓名身份证一致性比对'    
+         			or task_name LIKE '%身份证验证'
+					THEN
+						(
+							Target_Table_Row_Count - Result9
+						)
+					ELSE
+						0
+					END
+				) * 1.0 / sum(a.target_table_row_count) dataPercent
+			FROM
+				popu.m07_checkresult a
+			JOIN popu.m07_checklist b ON a.Dqid = b.dqid
+			JOIN popu_depart_stat_info c ON c.table_name = a.result2
+			GROUP BY
+				c.ord_id
+	</select>
+	
+	<!-- 数据质量列表查询 -->
+	<select id="getDepDataPercentDetail" resultType="hashmap">
+			SELECT
+				c.depart_name departName,
+				c.table_name_zh tableName,
+				CASE
+			WHEN sum(a.target_table_row_count) IS NULL
+			OR sum(a.target_table_row_count) = 0 THEN
+				0
+			ELSE
+				sum(
+					CASE
+					WHEN task_name LIKE '%主键重复检查'
+					OR task_name LIKE '%重复主键检查' THEN
+						(
+							Target_Table_Row_Count - Result5
+						)
+					WHEN task_name LIKE '%非空校验'
+					OR task_name LIKE '%标准代码检查'
+					OR task_name LIKE '%非空检查' 
+					or task_name LIKE '%数据比对' 
+					or task_name LIKE '%姓名身份证一致性比对'    
+         			or task_name LIKE '%身份证验证'  THEN
+						(
+							Target_Table_Row_Count - Result9
+						)
+					ELSE
+						0
+					END
+				) * 1.0 / sum(a.target_table_row_count) * 100 
+			END percent
+			FROM
+				popu.m07_checkresult a
+			JOIN popu.m07_checklist b ON a.Dqid = b.dqid
+			JOIN popu_depart_stat_info c ON table_name = a.result2
+			<where>
+				<if test="departName != null and departName.trim() != ''">
+				 	c.depart_name like concat('%',#{departName},'%')
+				</if>
+			</where>
+			GROUP BY
+				c.depart_name,
+				c.table_name_zh
+	</select>
+	<select id="getDepDataPercentDetailCount" resultType="int">
+			select count(*) from (
+				SELECT
+					c.depart_name departName
+				FROM
+					popu.m07_checkresult a
+				JOIN popu.m07_checklist b ON a.Dqid = b.dqid
+				JOIN popu_depart_stat_info c ON table_name = a.result2
+				<where>
+					<if test="departName != null and departName.trim() != ''">
+					 	c.depart_name like concat('%',#{departName},'%')
+					</if>
+				</where>
+				GROUP BY
+					c.depart_name,
+					c.table_name_zh
+			)tempTable
+	</select>
+	
+	
+	<!-- 人口数据归集列表 -->
+	<select id="getDataImputationList" resultType="hashmap">
+			select a.depart_name departName,a.table_name_zh tableName,max(b.target_table_row_count) rowCount 
+				  from popu_depart_stat_info a,
+				       popu.m07_checkresult b ,
+				       (select max(tx_date) as last_date from popu.m07_checkresult) c
+				 where 
+				   a.table_name = b.result2
+				   and b.tx_date = c.last_date
+				   <if test="departName != null and departName.trim() != ''">
+				 	and a.depart_name like concat('%',#{departName},'%')
+				</if>
+				group by a.depart_name,a.table_name_zh
+	</select>
+	<select id="getDataImputationCount" resultType="int">
+			select count(*) from (
+				select a.depart_name departName,a.table_name_zh tableName,max(b.target_table_row_count) rowCount 
+				  from popu_depart_stat_info a,
+				       popu.m07_checkresult b ,
+				       (select max(tx_date) as last_date from popu.m07_checkresult) c
+				 where 
+				   a.table_name = b.result2
+				   and b.tx_date = c.last_date
+				   <if test="departName != null and departName.trim() != ''">
+				 	and a.depart_name like concat('%',#{departName},'%')
+				</if>
+				group by a.depart_name,a.table_name_zh
+			)tempTable
+	</select>
+	
+	<!-- 基础信息、扩展信息 的查询 -->
+	<select id="getImputationInfo" resultType="hashmap">
+			SELECT
+				a.information_item informationItem,
+				a.src_depart depart,
+				ifnull(b.information_rate, '0') informationRate
+			FROM
+				popu_integrity_rate a
+			LEFT JOIN popu_rate b ON a.information_item = b.information_item
+			<where>
+				<if test="_parameter == 1 ">
+    			type = '基础信息'
+ 				</if>
+				<if test="_parameter == 0 ">
+    			type = '扩展信息'
+ 				</if>
+ 			</where>
+			ORDER BY
+				order_num
+	</select>
+	<select id="getCount" resultType="int">
+			SELECT count(1) 
+  				FROM popu_integrity_rate 
+			<where>
+				<if test="_parameter == 1 ">
+    			and type = '基础信息'
+ 				</if>
+				<if test="_parameter == 0 ">
+    			and type = '扩展信息'
+ 				</if>
+ 			</where>
+ 			group by type
+	</select>
+	<!-- 数据归集的完整率查询 -->
+	<select id="getImputationInfoFullRate" resultType="hashmap">
+			select sum(case when classify = '1' then 1 end)/count(1) as fullRate
+				 from popu_integrity_rate		
+	</select>
+	
+	<!-- 数据归集的总记录数 -->
+	<select id="getImputationInfoAllCount" resultType="BigInteger">
+			select information_rate informationRate from popu_rate where information_item = -1		
+	</select>
+	
+	
+</mapper>

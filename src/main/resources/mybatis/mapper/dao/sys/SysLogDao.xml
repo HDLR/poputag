@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eastern.jinxin.sys.operation.log.dao.SysLogDao">
+<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.eastern.jinxin.sys.operation.log.entity.SysLogEntity">
+		<id column="id" property="id" />
+		<result column="username" property="username" />
+		<result column="operation" property="operation" />
+		<result column="method" property="method" />
+		<result column="params" property="params" />
+		<result column="ip" property="ip" />
+		<result column="create_date" property="createDate" />
+	</resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from sys_log
+		<where>
+			<if test="key != null and key.trim() != ''"> `username` like concat('%',#{key},'%') or `operation` like concat('%',#{key},'%')
+			</if>
+		</where>
+		order by id desc
+	</select>
+	<select id="queryTotal" resultType="int">
+		select count(*) from sys_log
+		<where>
+			<if test="key != null and key.trim() != ''"> `username` like concat('%',#{key},'%') or `operation` like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

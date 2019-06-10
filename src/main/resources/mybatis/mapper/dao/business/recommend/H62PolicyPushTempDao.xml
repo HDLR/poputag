@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.recommend.dao.H62PolicyPushTempDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PolicyPushTempEntity" id="BaseResultMap">
+        <result property="tempId" column="temp_id"/>
+        <result property="tempNm" column="temp_nm"/>
+        <result property="tempContent" column="temp_content"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="tempDesc" column="temp_desc"/>
+    </resultMap>
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PolicyPushTempEntity" id="BaseResultMap2">
+        <result property="tempId" column="temp_id"/>
+        <result property="tempNm" column="temp_nm"/>
+        <result property="tempContent" column="temp_content"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="tempDesc" column="temp_desc"/>
+        <result property="userName" column="userName"/>
+    </resultMap>
+    
+    <select id="queryPolicyPushTempAll" resultMap="BaseResultMap">
+		select * from h62_policy_push_temp
+	</select>
+    
+	<select id="queryList" resultMap="BaseResultMap2">
+		select 
+			a.temp_id,
+			a.temp_nm,
+			a.temp_content,
+			a.create_dt,
+			a.create_user,
+			a.temp_desc,
+			(select b.username from sys_user b where b.user_id = a.create_user) userName 
+		from h62_policy_push_temp a
+        <where>
+			<if test="tempNm != null and tempNm.trim() != ''">
+			 	a.temp_nm like concat('%',#{tempNm},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_policy_push_temp
+        <where>
+			<if test="tempNm != null and tempNm.trim() != ''">
+			 	temp_nm like concat('%',#{tempNm},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

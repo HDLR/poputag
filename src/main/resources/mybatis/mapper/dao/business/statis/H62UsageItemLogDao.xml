@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.statis.dao.H62UsageItemLogDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.statis.entity.H62UsageItemLogEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="itemId" column="item_id"/>
+        <result property="itemType" column="item_type"/>
+        <result property="operateType" column="operate_type"/>
+        <result property="operateUser" column="operate_user"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+    </resultMap>
+    
+    <select id="queryCampUsageLog" resultType="hashmap">
+		SELECT
+			t.item_id camp_id,
+			b.camp_nm,
+			t.count
+		FROM
+			(
+				SELECT
+					a.item_id,
+					count(1) count
+				FROM
+					h62_usage_item_log a
+				WHERE
+					a.item_type = '01' 
+						and a.item_id in 
+						<foreach collection="campIds" index="index" item="item" open="(" separator="," close=")">
+							#{item}
+						</foreach> 
+				GROUP BY
+					a.item_id
+			) t
+		LEFT JOIN h62_campaign_info b ON t.item_id = b.camp_id
+		ORDER BY
+			t.count DESC
+	</select>
+	
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h62_usage_item_log
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_usage_item_log
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

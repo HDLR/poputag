@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:include="sys/header.html::head"></head>
+<body th:include="sys/header.html::body"></body>
+<title>管理员列表</title>
+<body>
+<div id="rrapp" v-cloak>
+	<div >
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+				<input type="text" class="form-control" v-model="q.username" @keyup.enter="query" placeholder="用户名">
+			</div>
+			<a class="btn btn-default" @click="query">查询</a>
+			<a shiro:hasPermission="sys:user:save" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<a shiro:hasPermission="sys:user:update" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<a shiro:hasPermission="sys:user:delete" class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class='cus-p-diag'>
+      <div class="panel panel-default cusdialog">
+        <div class="panel-heading">{{title}}</div>
+    <form class="form-horizontal">
+      <div class="form-group">
+          <div class="col-sm-2 control-label">用户名</div>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" v-model="user.username" placeholder="登录账号"/>
+          </div>
+      </div>
+      <div class="form-group">
+          <div class="col-sm-2 control-label">密码</div>
+          <div class="col-sm-10">
+            <input type="password" class="form-control" v-model="user.password" placeholder="密码"  @blur="validateStrongerPass(this.value)" />
+          	<code style="margin-top: 4px; display: none;" id="tips">最短8位，最长16位 {8,16},必须包含1个数字,必须包含2个小写字母,必须包含2个大写字母,必须包含1个特殊字符</code>
+          </div>
+      </div>
+      <div class="form-group">
+          <div class="col-sm-2 control-label">邮箱</div>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" v-model="user.email" placeholder="邮箱"/>
+          </div>
+      </div>
+      <div class="form-group">
+          <div class="col-sm-2 control-label">手机号</div>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" v-model="user.mobile" placeholder="手机号"/>
+          </div>
+      </div>
+      <div class="form-group">
+          <div class="col-sm-2 control-label">角色</div>
+          <div class="col-sm-10">
+            <label v-for="role in roleList" class="checkbox-inline">
+            <input type="checkbox" :value="role.roleId" v-model="user.roleIdList">{{role.roleName}}
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2 control-label">状态</div> 
+        <label class="radio-inline">
+          <input type="radio" name="status" value="0" v-model="user.status"/> 禁用
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="status" value="1" v-model="user.status"/> 正常
+        </label>
+      </div>
+    </form>
+       <div class="form-group">
+        <div class="col-sm-2 control-label"></div> 
+        <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+        &nbsp;&nbsp;<input type="button" class="btn btn-warning"  @click="closed"  value="返回"/>
+      </div>
+      </div>
+      </div>
+  </div>
+
+	<script th:src="@{/statics/js/sys/user.js}"></script>
+</body>
+</html>

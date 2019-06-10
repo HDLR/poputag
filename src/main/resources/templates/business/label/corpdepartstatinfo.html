@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet"
+	href="${rc.contextPath}/statics/plugins/layui/css/layui.css">
+<script src="${rc.contextPath}/statics/plugins/layui/layui.js"></script>
+<title>人口总览</title> #parse("sys/header.html")
+</head>
+<style>
+/*定义滚动条轨道*/
+::-webkit-scrollbar-track {
+	background-color: #F5F5F5;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.22);
+}
+/*定义滚动条高宽及背景*/
+::-webkit-scrollbar {
+	width: 5px;
+	background-color: rgba(0, 0, 0, 0.34);
+}
+/*定义滚动条*/
+::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 255, 255, 0.22);
+	border-radius: 10px;
+}
+
+.ui-jqgrid .ui-jqgrid-htable thead tr {
+	border-bottom: 0px solid #6096ff;
+	border-top: 1px solid #6096ff;
+	border-left: 1px solid #6096ff;
+	border-right: 1px solid #6096ff;
+}
+
+.ui-jqgrid .ui-jqgrid-htable thead tr th {
+	border-bottom: 0px solid #6096ff;
+	border-top: 1px solid #6096ff;
+	border-left: 1px solid #6096ff;
+	border-right: 1px solid #6096ff;
+}
+
+.ui-jqgrid .ui-jqgrid-htable thead th {
+	overflow: hidden;
+	border-bottom: none;
+	padding-right: 2px;
+	background-color: #def6f4;
+}
+
+.ui-jqgrid .ui-jqgrid-btable tbody tr {
+	border: 1px solid #6096ff;
+}
+
+.ui-jqgrid .ui-jqgrid-btable tbody tr.jqgrow td {
+	border: 1px solid #6096ff;
+}
+
+.ui-jqgrid .ui-jqgrid-btable tbody tr:nth-child(even).jqgrow td {
+	overflow: hidden;
+	white-space: pre;
+	padding-right: 2px;
+	background-color: #f5f3f3;
+}
+
+.ui-jqgrid .ui-jqgrid-btable tbody tr:nth-child(odd).jqgrow td {
+	overflow: hidden;
+	white-space: pre;
+	padding-right: 2px;
+	background-color: #def6f4;
+}
+
+.layui-this {
+	background-color: #619aff;
+}
+
+.container-fluid, .container-fluid>.row {
+	border: 0px solid #c5c3de;
+}
+
+.container-fluid {
+	height: 100%;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+.container-fluid {
+	padding-right: 0px;
+	padding-left: 0px;
+	margin-right: auto;
+	margin-left: auto;
+}
+body{
+	font-size:2vh
+}
+</style>
+<body>
+	<div id="rrapp" v-cloak class="layui-tab layui-tab-card" style="height: 100%;">
+		<div class="layui-tab" lay-filter="demo">
+			<ul class="layui-tab-title">
+				<li class="layui-this" style="font-size:2vh;">数据归集总览</li>
+				<li style="font-size:2vh;">数据共享总览</li>
+			</ul>
+		</div>
+		<div class="layui-tab-content" style="height: 93%;">
+			<div class="layui-tab-item  layui-show" style="height: 100%">
+				<div class="container-fluid">
+					<div class="row" style="height: 53%">
+						<div class="col-xs-2" style="height: 98%;padding:0px 2px 0px 0px;">
+							<div style="border-radius: 5px;border: 1px solid #c5c3de;width:100%;height:100%">
+								<div class="col-xs-12" style="height: 40%">
+									
+										<div class="col-xs-12" style="padding-left: 0px; height: 25%">
+											<img src=" ${rc.contextPath}/images/rk1.png" style="width: 20px;" />
+											人口总数
+										</div>
+										<div class="col-xs-12" id="allCountDiv"
+											style="height: 40%; text-align: center;color:rgb(233, 105, 0); font-size: 5vh; padding-left: 0px">
+										</div>
+									
+								</div>
+								<div class='col-xs-12'  style="height: 60%">
+									<div class="col-xs-12" style="padding-left: 0px; height: 15%">
+										<img src=" ${rc.contextPath}/images/rk1.png" style="width: 20px;" />
+										信息项归集完成率
+									</div>
+									<div class="col-xs-12" id='percentDiv'
+										style="height: 85%;">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xs-6" style="height: 98% ;padding:0px 2px 0px 0px;">
+							<div style="border-radius: 5px;border: 1px solid #c5c3de;width:100%;height:100%">
+								<div class="col-xs-12" style="height: 10%">
+									<img src=" ${rc.contextPath}/images/rk1.png" style="width: 20px;" />
+									各单位提供的信息项统计
+								</div>
+								<div class="col-xs-12" id="leftUpContent" style="height:90%">
+	
+								</div>
+							</div>
+						</div>
+						<div class="col-xs-4" style="height: 98%;border: 1px solid #c5c3de;border-radius: 5px">
+							<div class="col-xs-12" style="height: 10%">
+								<img src=" ${rc.contextPath}/images/rk2.png" style="width: 20px;" />
+								基础信息项<span id="baseCount" style="padding-right: 20px; float: right;font-size:2vh; color: #e96900;"></span>
+							</div>
+							<div class="col-xs-12" style="height: 90%">
+								<div class="row pre-scrollable" id="imputation"
+									style='max-height: 99%'></div>
+							</div>
+						</div>
+					</div>
+					<div class="row" style="height: 47%">
+						<div class="col-xs-8" style="height: 98%;padding:0px 2px 0px 0px;">
+							<div style="border-radius: 5px;border: 1px solid #c5c3de;width:100%;height:100%">
+								<div class="col-xs-12" style="height: 10%">
+									<img src=" ${rc.contextPath}/images/rk3.png" style="width: 20px;" />
+									海南省各单位数据质量
+								</div>
+								<div class="col-xs-12" id='leftDownContent' style="height: 90%">
+								</div>
+							</div>
+						</div>
+						<div class="col-xs-4" style="height: 98%;border: 1px solid #c5c3de;border-radius: 5px;margin-bottom: 5px">
+							<div class="col-xs-12" style="height: 10%">
+								<img src=" ${rc.contextPath}/images/rk2.png" style="width: 20px;" />
+								扩展信息项<span id="ExCount" style="padding-right: 20px; float: right;font-size:2vh; color: #e96900;"></span>
+							</div>
+							<div class="col-xs-12" style="height: 90%">
+								<div class="row pre-scrollable" id="NOTimputation"
+									style="max-height: 99%"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-tab-item" style="height: 100%">
+				<div class="container-fluid">
+					<div class="row" style="height: 100%">
+						<div class="col-xs-3" style="height: 98%">
+							<div class="col-xs-12" id='data1' style="height: 24%;border: 1px solid #c5c3de;height: 24%;border-radius: 5px;margin-bottom: 5px"></div>
+							<div class="col-xs-12" id='data2' style="height: 24%;border: 1px solid #c5c3de;height: 24%;border-radius: 5px;margin-bottom: 5px"></div>
+							<div class="col-xs-12" style="height: 24% ;border: 1px solid #c5c3de;height: 24%;border-radius: 5px;margin-bottom: 5px" >
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%; font-size: 3vh;">共享资源总数<span style="color: #e96900; font-size: 1.1em;">35</span>个</div>
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%; font-size: 3vh;">共享人口资源数 <span style="color: #e96900; font-size: 1.1em;">15</span>个</div>
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%; font-size: 3vh;">共享人口资源数<span style="color: #e96900; font-size: 1.1em;">20</span>个</div>
+							</div> 
+							<div class="col-xs-12" style="height: 24%;border: 1px solid #c5c3de;height: 24%;border-radius: 5px;margin-bottom: 5px">
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%; font-size: 3vh;">共享总记录数<span style="color: #e96900; font-size: 1.1em;">12730022</span> 条</div>
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%;font-size: 3vh;">共享人口记录数 <span style="color: #e96900; font-size: 1.1em;">12589912</span>条</div>
+								<div class='col-xs-11 col-xs-offset-1' style="height: 33%; font-size: 3vh;">共享法人记录数 <span style="color: #e96900; font-size: 1.1em;">140110 </span>条</div>
+							</div>
+						</div>
+						<div class="col-xs-9" style="height: 98%">
+							<div class="col-xs-12" style="height: 49%">
+								<div class="layui-tab layui-tab-card" lay-filter="demo3"
+									style="height: 100%">
+									<ul class="layui-tab-title">
+										<li class="layui-this" style="font-size: 2vh;">共享信息资源总量</li>
+										<li style="font-size: 2vh;">数据资源共享趋势</li>
+									</ul>
+									<div class="layui-tab-content" style="height: 85%">
+										<div class="layui-tab-item layui-show" id='data3'
+											style="height: 100%"></div>
+										<div class="layui-tab-item" id='data3_2' style="height: 100%"></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-xs-12" style="height: 49%">
+								<div class="layui-tab layui-tab-card" lay-filter="demo4"
+									style="height: 100%">
+									<ul class="layui-tab-title">
+										<li class="layui-this">部门使用TOP10</li>
+										<li></li>
+									</ul>
+									<div class="layui-tab-content" style="height: 85%">
+										<div class="layui-tab-item layui-show" id='data4'
+											style="height: 100%"></div>
+										<div class="layui-tab-item" id='data4_2' style="height: 100%">2</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		
+		
+       <div v-show="!showList" class='cus-p-diag' style="z-index: 100">
+        <div class="panel panel-default cusdialog">
+          <div class="panel-heading">
+            <span class="title_label">{{title}}</span>
+            <input type="button" class="btn btn-warning btn-close" @click="closed" value="返回" />
+          </div>
+          <div style="width: 100%">
+            <table id="jqGrid"></table>
+            <div id="jqGridPager" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+      <div v-show="!showListTwo" class='cus-p-diag' style="z-index: 100">
+        <div class="panel panel-default cusdialog">
+          <div class="panel-heading">
+            <span class="title_label">{{title}}</span>
+            <input type="button" class="btn btn-warning btn-close" @click="closed" value="返回" />
+          </div>
+          <div style="width: 100%">
+            <table id="jqGridTwo"></table>
+            <div id="jqGridPagerTwo" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+      
+	</div>
+</body>
+<script>
+	var count_a = 0;
+	var count_b = 0;
+	var count_b2 = 0;
+	var count_c = 0;
+	layui.use('element', function() {
+		var $ = layui.jquery
+		//,element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+		//触发事件
+		//一些事件监听
+		var element = layui.element();
+		element.on('tab(demo)', function(data) {
+			if (data.index == 1 && count_a == 0) {
+				onload1();
+				onload2();
+				onload3_1();
+				onload4();
+				count_a++;
+			}
+		});
+		element.on('tab(demo3)', function(data) {
+			if (data.index == 1 && count_b == 0) {
+				onload3_2();
+				count_b++;
+			} else if (data.index == 2 && count_b2 == 0) {
+				onload3_3();
+				count_b2++;
+			}
+		});
+		element.on('tab(demo4)', function(data) {
+			if (data.index == 1 && count_c == 0) {
+				onload4_2();
+				count_c++;
+			}
+		});
+	});
+</script>
+
+<script
+	src="${rc.contextPath}/js/public/echarts.min.js?_${date.systemTime}"></script>
+<script
+	src="${rc.contextPath}/js/public/echarts-liquidfill.js?_${date.systemTime}"></script>
+<script
+	src="${rc.contextPath}/js/label/corpdepartstatinfo.js?_${date.systemTime}"></script>
+<script
+	src="${rc.contextPath}/js/label/corpdepartstatinfo2newDiv.js?_${date.systemTime}"></script>
+</body>
+</html>

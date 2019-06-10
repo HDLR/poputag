@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<style type="text/css"> 
+.button_location{
+	height:auto;
+	float:right;
+	margin-right:100px;
+	margin-top:10px;
+}
+.prompt_msg {
+	color: red;
+	padding-left: 15px;
+	font-size: 15px;
+}
+.prompt_msg>span {
+	margin-right: 10px;
+	margin-left: 15px;
+}
+.main_contents{
+	border:1px solid #00CC00; 
+	position: absolute; 
+	width:100%; 
+	height:100%;
+	/* background: burlywood; */
+    /* box-shadow: darkgrey 0px 0px 30px 5px inset; *//* 边框内阴影 */
+}
+</style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div class="main_contents">
+		<div id="left_body" class="tag_tree1">
+		    <ul id="menuTree" class="ztree"></ul>
+		</div>
+		
+		<div id="right_body" class="right_body">
+		    <div id="main_div" v-show="!showList" style="width: 800px;height:500px;"></div>
+		    <div v-show="showList" style="width: 800px;height:500px;">
+				<h4 class="prompt_msg">【用户群管理-群热度分析】提示：</h4>
+				<h2 style="font-size: 15px;margin-left: 15px;">
+					<span class="glyphicon glyphicon-hand-right"></span>
+				 	请勾选左侧的群组，展示勾选的群组的人数对比！
+				</h2>
+		    </div>
+		</div>
+    </div>
+</div>
+<script src="${rc.contextPath}/js/public/echarts.min.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/userGroup/heatAnalysis.js?_${date.systemTime}"></script>
+</body>
+</html>

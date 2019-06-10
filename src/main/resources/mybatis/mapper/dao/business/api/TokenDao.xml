@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.api.dao.TokenDao">
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.eastern.jinxin.business.api.entity.TbTokenEntity">
+		<id column="user_id" property="userId" />
+		<result column="token" property="token" />
+		<result column="expire_time" property="expireTime" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+
+	<select id="queryByUserId" resultMap="BaseResultMap">
+		select * from tb_token where user_id = #{value}
+	</select>
+
+	<select id="queryByToken" resultMap="BaseResultMap">
+		select * from tb_token where token = #{value}
+	</select>
+	 
+	<insert id="save" parameterType="com.eastern.jinxin.business.api.entity.TbTokenEntity">
+		insert into tb_token
+		(
+			`user_id`, 
+			`token`, 
+			`expire_time`, 
+			`update_time`
+		)
+		values
+		(
+			#{userId}, 
+			#{token}, 
+			#{expireTime}, 
+			#{updateTime}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.eastern.jinxin.business.api.entity.TbTokenEntity">
+		update tb_token 
+		<set>
+			<if test="token != null">`token` = #{token}, </if>
+			<if test="expireTime != null">`expire_time` = #{expireTime}, </if>
+			<if test="updateTime != null">`update_time` = #{updateTime}</if>
+		</set>
+		where user_id = #{userId}
+	</update>
+
+</mapper>

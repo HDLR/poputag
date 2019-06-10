@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.recommend.dao.H62PolicyPushDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PolicyPushEntity" id="BaseResultMap">
+        <result property="pushId" column="push_id"/>
+        <result property="policyId" column="policy_id"/>
+        <result property="campId" column="camp_id"/>
+        <result property="pushNm" column="push_nm"/>
+        <result property="pushDesc" column="push_desc"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="tempId" column="temp_id"/>
+    </resultMap>
+    
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62PolicyPushEntity" id="BaseResultMap2">
+        <result property="pushId" column="push_id"/>
+        <result property="policyId" column="policy_id"/>
+        <result property="campId" column="camp_id"/>
+        <result property="pushNm" column="push_nm"/>
+        <result property="pushDesc" column="push_desc"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="tempId" column="temp_id"/>
+        <result property="policyNm" column="policy_nm"/>
+        <result property="tempNm" column="temp_nm"/>
+        <result property="campNm" column="camp_nm"/>
+        <result property="username" column="username"/>
+    </resultMap>
+    
+    <select id="getPolicyPush" resultMap="BaseResultMap2">
+		SELECT
+			a.push_id,
+	        a.policy_id,
+	        a.camp_id,
+	        a.push_nm,
+	        a.push_desc,
+	        a.create_dt,
+	        a.create_user,
+	        a.temp_id,
+			e.policy_nm,
+			b.temp_nm,
+			c.camp_nm,
+			d.username
+		FROM
+			h62_policy_push a
+		LEFT JOIN h62_recom_policy e ON a.policy_id = e.id
+		LEFT JOIN h62_campaign_info c ON c.camp_id = a.camp_id
+		LEFT JOIN h62_policy_push_temp b ON a.temp_id = b.temp_id
+		LEFT JOIN sys_user d ON a.create_user = d.user_id
+        where a.push_id = #{pushId}
+	</select>
+    
+    
+	<select id="queryPolicyPushs" resultMap="BaseResultMap2">
+		SELECT
+			a.push_id,
+	        a.policy_id,
+	        a.camp_id,
+	        a.push_nm,
+	        a.push_desc,
+	        a.create_dt,
+	        a.create_user,
+	        a.temp_id,
+			e.policy_nm,
+			b.temp_nm,
+			c.camp_nm,
+			d.username
+		FROM
+			h62_policy_push a
+		LEFT JOIN h62_recom_policy e ON a.policy_id = e.id
+		LEFT JOIN h62_campaign_info c ON c.camp_id = a.camp_id
+		LEFT JOIN h62_policy_push_temp b ON a.temp_id = b.temp_id
+		LEFT JOIN sys_user d ON a.create_user = d.user_id
+        <where>
+			<if test="pushNm != null and pushNm.trim() != ''">
+			 	a.push_nm like concat('%',#{pushNm},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from h62_policy_push
+        <where>
+			<if test="pushNm != null and pushNm.trim() != ''">
+			 	push_nm like concat('%',#{pushNm},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_policy_push
+        <where>
+			<if test="pushNm != null and pushNm.trim() != ''">
+			 	push_nm like concat('%',#{pushNm},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

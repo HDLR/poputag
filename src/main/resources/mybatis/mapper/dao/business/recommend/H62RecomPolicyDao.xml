@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.recommend.dao.H62RecomPolicyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62RecomPolicyEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="policyId" column="policy_id"/>
+        <result property="policyNm" column="policy_nm"/>
+        <result property="policyCont" column="policy_cont"/>
+        <result property="policyHref" column="policy_href"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+    </resultMap>
+    <resultMap type="com.eastern.jinxin.business.recommend.entity.H62RecomPolicyEntity" id="BaseResultMap2">
+        <result property="id" column="id"/>
+        <result property="policyId" column="policy_id"/>
+        <result property="policyNm" column="policy_nm"/>
+        <result property="policyCont" column="policy_cont"/>
+        <result property="policyHref" column="policy_href"/>
+        <result property="createDt" column="create_dt"/>
+        <result property="createUser" column="create_user"/>
+        <result property="userName" column="userName"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap2">
+		select id, policy_id, policy_nm, policy_cont, policy_href, create_dt, create_user, 
+		(select b.username from sys_user b where b.user_id = a.create_user) userName
+		from h62_recom_policy a
+        <where>
+			<if test="policyNm != null and policyNm.trim() != ''">
+			 	policy_nm like concat('%',#{policyNm},'%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="queryRecomPolicyAll" resultMap="BaseResultMap">
+		select * from h62_recom_policy
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from h62_recom_policy
+        <where>
+			<if test="policyNm != null and policyNm.trim() != ''">
+			 	policy_nm like concat('%',#{policyNm},'%')
+			</if>
+		</where>
+	</select>
+</mapper>

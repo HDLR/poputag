@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+#parse("sys/header.html")
+<style type="text/css"> 
+
+.onclickCampClass{
+	background-color: #0073c2;
+	color:#fff;
+}
+
+</style>
+</head>
+<body>
+<form></form>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<a class="btn btn-primary" @click="history.back(-1);">&nbsp;返回群组列表</a>
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList">
+    	<div style="border-radius:5px; border:1px solid #c5c3de; height:526px; width:50%; background-color:#FFF; margin:5px 5px 5px 5px; float:left;">
+	 		<div style="height:40px; border-bottom:0.5px dashed #D8D8D8; margin-left:20px; margin-right:20px;">
+				<div style="padding:10px; color:#39c4bf;">姓名：{{name}}</div>
+			</div>
+			<div style="height:480px; overflow:auto; padding:30px 20px 0 15px;">
+				<div v-for="item in parents" style="padding:10px 10px 20px 15px; float:left;">
+					<div :id="'tag_' + item.name" v-on:click="clickTag(item.name)" :style="'cursor:pointer; border:1px solid ' + item.color + '; border-radius:3px; height:40px; width:110px; font-size:5px;'">
+						<div style="float:left; padding:9px 10px 10px 10px;"><img :src="'${rc.contextPath}/statics/image/group/wg/' + item.img"/></div>
+						<div style="float:left; padding:10px 10px 10px 0;">{{item.name}}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<div style="border-radius:5px; border:1px solid #c5c3de; height:98%; width:47%; float:left; margin:5px 5px 5px 0px;">
+			<div style="width:555px; height:518px; background-color:#FFF; margin:0 5px 5px 0px;">
+				<div style="height:40px; border-bottom:0.5px dashed #D8D8D8; margin-left:20px; margin-right:20px;">
+					<div style="padding:10px; color:#39c4bf;">{{parentName}}</div>
+				</div>
+				<div style="height:470px; overflow:auto;">
+					<div v-show="isShow" v-for="c in childs" style="width:98%; height:30px; padding:20px 0 20px 0">
+						<div style="font-size:5px; width:48%; height:30px; text-align:right; color:#6ac439; float:left;">{{c.tag_ctgy_nm}}</div>
+				        <div style="font-size:5px; width:48%; height:30px; text-align:left; float:right; padding:0 0 0 20px">{{c.tag_nm}}</div>
+			        </div>
+			        <div v-show="!isShow" style="height:15px; font-size:12px; padding:50px 20px 20px 20px;">
+			        	<div style="border-left:3px solid red; font-size:12px; padding:0 0 0 10px;">
+							点击左侧标签属性大类查询对应的明细信息。
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+</div>
+<script src="${rc.contextPath}/js/public/echarts.min.js?_${date.systemTime}"></script>
+<script src="${rc.contextPath}/js/userGroup/microsPersonsView.js?_${date.systemTime}"></script>
+</body>
+</html>

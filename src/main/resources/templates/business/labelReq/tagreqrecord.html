@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>标签需求</title>
+#parse("sys/header.html")
+<style type="text/css"> 
+
+</style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+          		<input type="text" class="form-control" v-model="q.reqName" @keyup.enter="query" placeholder="标签需求名称">
+        	</div>
+        	<a class="btn btn-default" @click="query">查询</a>
+			#if($shiro.hasPermission("tagreq:record:save"))
+			<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			#end
+			#if($shiro.hasPermission("tagreq:record:update"))
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			#end
+			#if($shiro.hasPermission("tagreq:record:delete"))
+			<a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			#end
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    <div v-show="!showList" class="cus-p-diag">
+    <div class="panel panel-default" style="width: 100%;height:600px;">
+		<form class="form-horizontal">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">标签需求名称</div>
+			   	<div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tagReqRecord.reqName" :disabled="readonlyFlag" placeholder="标签需求名称"/>
+			    </div>
+			</div>
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">标签需求描述</div>
+			   	<div class="col-sm-10">
+			      <textarea rows="5" class="form-control" v-model="tagReqRecord.reqDescribe" :disabled="readonlyFlag" placeholder="标签需求描述"></textarea>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">用户群配置</div>
+			   	<div class="col-sm-10">
+			    <select v-model="tagReqRecord.webserviceId" :disabled="readonlyFlag" class="form-control" style="cursor: pointer;">
+					<option v-for="option in apiList" v-bind:value="option.campId">{{ option.name }}</option>
+				</select>
+				</div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">请求url</div>
+			    <div class="col-sm-10">
+			      <input type="text" class="form-control" v-model="tagReqRecord.url" :disabled="readonlyFlag" placeholder="请求url"/>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">请求方法</div>
+			   	<div class="col-sm-10">
+			    <select v-model="tagReqRecord.method" :disabled="readonlyFlag" class="form-control" style="cursor: pointer;">
+					<option v-for="option in methods" v-bind:value="option.method">{{ option.method }}</option>
+				</select>
+				</div>
+			</div>
+			
+			<div class="form-group" style="text-align:center">
+				<div v-if="!readonlyFlag">
+					<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" />
+	            	&nbsp;&nbsp;
+	            	<input type="button" class="btn btn-warning"  @click="closed"  value="取消" />
+				</div>
+			</div>
+			
+		</form>
+	</div>
+	</div>
+</div>
+
+<script src="${rc.contextPath}/js/labelReq/tagreqrecord.js?_${date.systemTime}"></script>
+</body>
+</html>

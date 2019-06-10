@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eastern.jinxin.business.label.dao.ManagerDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.eastern.jinxin.business.label.entity.ManagerEntity" id="BaseResultMap">
+        <result property="tagCtgyId" column="tag_ctgy_id"/>
+        <result property="tagCtgyNm" column="tag_ctgy_nm"/>
+        <result property="tagDesc" column="tag_desc"/>
+        <result property="tagTypeCd" column="tag_type_cd"/>
+        <result property="upTagCtgyId" column="up_tag_ctgy_id"/>
+        <result property="haveTagInd" column="have_tag_ind"/>
+        <result property="tagCtgyStatus" column="tag_ctgy_status"/>
+        <result property="enabledDt" column="enabled_dt"/>
+        <result property="disabledDt" column="disabled_dt"/>
+        <result property="createdTs" column="created_ts"/>
+        <result property="updatedTs" column="updated_ts"/>
+        <result property="tagCtgyLevel" column="tag_ctgy_level"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="createUser" column="create_user"/>
+        <result property="tagType" column="tag_type"/>
+    </resultMap>
+	<select id="queryList" resultMap="BaseResultMap">
+		select * from manager
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from manager
+        <where>
+			<if test="key != null and key.trim() != ''">
+			 	username like concat('%',#{key},'%')
+			</if>
+		</where>
+	</select>
+	<sql id="tagCtgyBaseSql">
+		<trim prefix="WHERE" prefixOverrides="and">
+			1=1
+			<choose>
+				<when test="id != null and id != '' and id != '-1'">
+					AND up_tag_ctgy_id=#{id}
+				</when>
+				<otherwise>
+					AND (up_tag_ctgy_id='' OR up_tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</trim>
+	</sql>
+	
+	<sql id="tagBaseSql">
+		<trim prefix="WHERE" prefixOverrides="and">
+			1=1
+			<choose>
+				<when test="id != null and id != ''">
+					AND tag_ctgy_id=#{id}
+				</when>
+				<otherwise>
+					AND (tag_ctgy_id='' OR tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</trim>
+	</sql>
+	<sql id="tagCtyBaseSql">
+		<trim prefix="WHERE" prefixOverrides="and">
+			1=1
+			<if test="tagName != null and tagName != ''">
+				AND tag_ctgy_nm LIKE CONCAT('%',CONCAT('${tagName}','%'))
+			</if>
+			<if test="tagStatus != null and tagStatus != ''">
+				AND tag_ctgy_status=#{tagStatus}
+			</if>
+			<if test="tagLevel != null and tagLevel != ''  and tagLevel != '-1'">
+				AND tag_ctgy_level=#{tagLevel}
+			</if>
+			<if test="startTime != null and startTime != '' ">
+				AND DATE_FORMAT(created_ts, '%Y-%m-%d')<![CDATA[>=]]> #{startTime}
+			</if>
+			<if test="endTime != null and endTime != '' ">
+				AND DATE_FORMAT(created_ts, '%Y-%m-%d')<![CDATA[<=]]> #{endTime}
+			</if>
+		</trim>
+	</sql>
+	<sql id="tagListBaseSql">
+		<trim prefix="WHERE" prefixOverrides="and">
+			1=1
+			<if test="tagName != null and tagName != ''">
+				AND tag_nm LIKE CONCAT('%',CONCAT('${tagName}','%'))
+			</if>
+			<if test="tagStatus != null and tagStatus != ''">
+				AND active_ind=#{tagStatus}
+			</if>
+		</trim>
+	</sql>
+	
+	
+	
+	<!-- 查询所有标签进行导出到excel -->
+	<select id="queryAllTagExcel" resultType="hashmap">
+		SELECT *  FROM (
+			SELECT 
+			  tag_ctgy_id tag_id,
+			  tag_ctgy_nm tag_nm,
+			  tag_desc,
+			  tag_type_cd,
+			  up_tag_ctgy_id tag_ctgy_id,
+			  <![CDATA[ DATE_FORMAT(enabled_dt, '%Y/%m/%d') enabled_dt_str]]>,
+			  <![CDATA[ DATE_FORMAT(disabled_dt, '%Y/%m/%d') disabled_dt_str]]>,
+			  <![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签'  END tag_type]]>,
+			  <![CDATA[ '' unknown_ind]]>,
+			  <![CDATA[ CASE  have_tag_ind WHEN 1 THEN '是' ELSE '否' END have_tag_ind]]>,
+			  <![CDATA[ CASE tag_ctgy_status WHEN 2  THEN '启用'    ELSE '禁用'  END tag_status_str ]]>
+			FROM
+			  h50_tag_category_info 
+			UNION
+			ALL 
+			SELECT 
+			  tag_id,
+			  tag_nm,
+			  tag_desc,
+			  tag_type_cd,
+			  tag_ctgy_id,
+			  <![CDATA[ DATE_FORMAT(enabled_dt, '%Y/%m/%d') enabled_dt_str]]>,
+			  <![CDATA[ DATE_FORMAT(disabled_dt, '%Y/%m/%d') disabled_dt_str]]>,
+			  <![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签'  END tag_type]]>,
+			  <![CDATA[ CASE  unknown_ind WHEN 1 THEN '是' ELSE '否' END unknown_ind]]>,
+			  <![CDATA[ '' have_tag_ind]]>,
+			  <![CDATA[ CASE  active_ind    WHEN 1   THEN '启用'   ELSE '禁用'  END tag_status_str ]]>
+			FROM
+			  h50_tag_info 
+		  )  a   ORDER BY a.tag_id
+	</select>
+	
+	<select id="queryListExcel2" resultType="hashmap">
+		SELECT * FROM (
+		SELECT
+		tag_id,tag_nm,tag_desc,tag_type_cd,tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt, '%Y-%m-%d') disabled_dt_str,
+		<![CDATA[ CASE  unknown_ind WHEN 1 THEN '是' ELSE '否' END unknown_ind]]>,
+		<![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签' END tag_type]]>,
+		<![CDATA[ CASE  active_ind WHEN 1 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_info
+		<include refid="tagBaseSql" />
+		UNION ALL
+		SELECT
+		tag_ctgy_id tag_id,tag_ctgy_nm tag_nm,
+		tag_desc,tag_type_cd ,up_tag_ctgy_id tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt,'%Y-%m-%d') disabled_dt_str,
+		<![CDATA[ CASE  have_tag_ind WHEN 1 THEN '是' ELSE '否' END have_tag_ind]]>,
+		<![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签'  END tag_type]]>,
+		<![CDATA[ CASE  tag_ctgy_status WHEN 2 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_category_info
+		<include refid="tagCtgyBaseSql" />
+		) a
+	</select>
+	
+	<select id="queryTagCtyListExcel2" resultType="hashmap">
+		SELECT
+		tag_ctgy_id tag_id,tag_ctgy_nm tag_nm,tag_desc,tag_type_cd
+		,up_tag_ctgy_id  tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt,'%Y-%m-%d') disabled_dt_str,
+		<![CDATA[ CASE  have_tag_ind WHEN 1 THEN '是' ELSE '否' END have_tag_ind]]>,
+		<![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签'  END tag_type]]>,
+		<![CDATA[ CASE  tag_ctgy_status WHEN 2 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_category_info
+		<include refid="tagCtyBaseSql" />
+	</select>
+	
+	<select id="queryTagListExcel2" resultType="hashmap">
+		SELECT
+		tag_id,tag_nm,tag_desc,tag_type_cd,tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt, '%Y-%m-%d') disabled_dt_str,
+		<![CDATA[ CASE  unknown_ind WHEN 1 THEN '是' ELSE '否' END unknown_ind]]>,
+		<![CDATA[ CASE  tag_type WHEN 1 THEN '分类标签' ELSE '叶子标签' END tag_type]]>,
+		<![CDATA[ CASE  active_ind WHEN 1 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_info
+		<include refid="tagListBaseSql" />
+	</select>
+	
+	<select id="getAllTagIds" resultType="String">
+		select
+		tag_ctgy_id tag_id
+		from
+		h50_tag_category_info
+		union all
+		select
+		tag_id tag_id
+		from
+		h50_tag_info
+	</select>
+	
+	<select id="findTagCtgyById" parameterType="int"
+		resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT
+		tag_ctgy_id tag_id,tag_ctgy_nm
+		tag_nm,tag_desc,tag_type_cd ,up_tag_ctgy_id
+		tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt,'%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d') updated_ts_str,
+		DATE_FORMAT(created_ts, '%Y-%m-%d') created_ts_str,
+		tag_type,
+		tag_ctgy_level,
+		have_tag_ind,
+		tag_ctgy_status tag_status
+		FROM
+		h50_tag_category_info
+		WHERE tag_ctgy_id=#{id}
+	</select>
+	
+	<select id="findTagById" parameterType="int"
+		resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT
+		tag_id,tag_nm,tag_desc,tag_type_cd,tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt, '%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d') updated_ts_str,
+		DATE_FORMAT(created_ts,'%Y-%m-%d') created_ts_str,
+		tag_type,
+		unknown_ind,
+		active_ind tag_status
+		FROM h50_tag_info
+		WHERE tag_id=#{id}
+	</select>
+	
+	<update id="updateTag" parameterType="hashmap">
+		update h50_tag_info SET
+		tag_nm = #{tag_nm}
+		, tag_desc = #{tag_desc}
+		, active_ind = #{tag_status}
+		, enabled_dt = #{enabled_dt}
+		, disabled_dt = #{disabled_dt}
+		where
+		tag_id=#{id}
+	</update>
+	
+	<insert id="insertTag" parameterType="hashmap">
+		INSERT INTO h50_tag_info (
+		tag_id
+		,tag_nm
+		,tag_desc
+		,tag_type_cd
+		,active_ind
+		,tag_ctgy_id
+		,enabled_dt
+		,disabled_dt
+		,updated_ts
+		,created_ts
+		,create_user
+		,update_user
+		,unknown_ind
+		)
+		VALUES( #{tag_id},#{tag_nm},#{tag_desc}
+		,#{tag_type_cd},#{tag_status},#{tag_ctgy_id}
+		,#{enabled_dt},#{disabled_dt},#{updated_ts}
+		,#{created_ts},#{create_user}
+		,#{update_user},#{unknown_ind})
+	</insert>
+	<!-- 修改标签类别 -->
+	<update id="updateTagCtyg" parameterType="hashmap">
+		update
+		h50_tag_category_info SET
+		tag_ctgy_nm = #{tag_nm}
+		, tag_desc =
+		#{tag_desc}
+		, tag_ctgy_status = #{tag_status}
+		, enabled_dt =
+		#{enabled_dt}
+		, disabled_dt = #{disabled_dt}
+		where tag_ctgy_id=#{id}
+	</update>
+	<!-- 从ecxel添加标签类别 -->
+	<insert id="insertTagCtyg" parameterType="hashmap">
+		INSERT INTO
+		h50_tag_category_info (
+		tag_ctgy_id
+		,tag_ctgy_nm
+		,tag_desc
+		,tag_type_cd
+		,tag_ctgy_status
+		,up_tag_ctgy_id
+		,enabled_dt
+		,disabled_dt
+		,updated_ts
+		,created_ts
+		,have_tag_ind
+		,create_user
+		,update_user
+		,tag_ctgy_level
+		)
+		VALUES( #{tag_id},#{tag_nm},#{tag_desc}
+		,#{tag_type_cd},#{tag_status},#{tag_ctgy_id}
+		,#{enabled_dt},#{disabled_dt},#{updated_ts}
+		,#{created_ts},#{have_tag_ind},#{create_user}
+		,#{update_user},#{tag_ctgy_level})
+	</insert>
+	
+	
+	<select id="queryListById" resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT * FROM (
+		SELECT
+		tag_id,tag_nm,tag_desc,tag_type_cd,tag_ctgy_id,
+		 DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt, '%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d') updated_ts_str,
+		DATE_FORMAT(created_ts,'%Y-%m-%d') created_ts_str, 
+		tag_type,
+		<![CDATA[ '' tag_ctgy_level,]]>
+		<![CDATA[ CASE  active_ind WHEN 1 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_info
+		<where>
+			<choose>
+				<when test="tagCtgyId != null and tagCtgyId != '' ">
+					AND tag_ctgy_id=#{tagCtgyId}
+				</when>
+				<otherwise>
+					AND (tag_ctgy_id='' OR tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</where>
+		UNION ALL
+		SELECT
+		tag_ctgy_id tag_id,tag_ctgy_nm
+		tag_nm,tag_desc,tag_type_cd ,up_tag_ctgy_id
+		tag_ctgy_id,
+		 DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt,'%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d') updated_ts_str,
+		DATE_FORMAT(created_ts, '%Y-%m-%d') created_ts_str, 
+		tag_type,
+		tag_ctgy_level tag_ctgy_level,
+		<![CDATA[ CASE  tag_ctgy_status WHEN 2 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_category_info
+		<where>
+			<choose>
+				<when test="tagCtgyId != null and tagCtgyId != '' and tagCtgyId != '-1'">
+					AND up_tag_ctgy_id=#{tagCtgyId}
+				</when>
+				<otherwise>
+					AND (up_tag_ctgy_id='' OR up_tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</where>
+		) a
+	</select>
+	
+	<select id="queryClickNodeListTotal" resultType="int">
+		SELECT count(*) FROM (
+		SELECT
+			tag_id
+		FROM h50_tag_info
+		<where>
+			<choose>
+				<when test="tagCtgyId != null and tagCtgyId != ''">
+					AND tag_ctgy_id=#{tagCtgyId}
+				</when>
+				<otherwise>
+					AND (tag_ctgy_id='' OR tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</where>
+		UNION ALL
+		SELECT
+			tag_ctgy_id tag_id
+		FROM h50_tag_category_info
+		<where>
+			<choose>
+				<when test="tagCtgyId != null and tagCtgyId != '' and tagCtgyId != '-1'">
+					AND up_tag_ctgy_id=#{tagCtgyId}
+				</when>
+				<otherwise>
+					AND (up_tag_ctgy_id='' OR up_tag_ctgy_id IS NULL)
+				</otherwise>
+			</choose>
+		</where>
+		) a
+	</select>
+	<!-- 点击按钮进行查询 -->
+	<select id="queryTagCtyList" resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT
+		tag_ctgy_id tag_id,tag_ctgy_nm tag_nm,tag_desc,tag_type_cd
+		,up_tag_ctgy_id
+		tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d')
+		enabled_dt_str,
+		DATE_FORMAT(disabled_dt,
+		'%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d') updated_ts_str,
+		DATE_FORMAT(created_ts, '%Y-%m-%d') created_ts_str,
+		tag_type,
+		tag_ctgy_level,
+		<![CDATA[ CASE  tag_ctgy_status WHEN 2 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_category_info
+		<include refid="tagCtyBaseSql" />
+	</select>
+	<select id="queryTagCtyListTotal" resultType="int">
+		SELECT
+			count(*)
+		FROM h50_tag_category_info
+		<include refid="tagCtyBaseSql" />
+	</select>
+	
+	<!-- 查询 h50_tag_info 和h50_tag_category_info union的信息 -->
+	<select id="getTagInfoById" resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT
+			t.tag_ctgy_id tag_id,
+			t.tag_ctgy_nm tag_nm,
+			t.tag_desc tag_desc,
+			t.tag_type_cd tag_type_cd,
+			t.enabled_dt enabled_dt_str,
+			t.disabled_dt disabled_dt_str,
+			t.tag_ctgy_status tag_status,
+			t.up_tag_ctgy_id up_tid,
+			t.tag_ctgy_level tag_ctgy_level,
+			t.have_tag_ind have_tag_ind,
+			'' unknown_ind,
+			'' up_name
+		FROM
+			h50_tag_category_info t
+		<where>
+			<if test="_parameter != null ">
+				t.tag_ctgy_id = #{tagId}
+			</if>
+		</where>
+		UNION
+			SELECT
+				t.tag_id tag_id,
+				t.tag_nm tag_name,
+				t.tag_desc tag_desc,
+				t.tag_type_cd tag_type_cd,
+				t.enabled_dt enabled_dt_str,
+				t.disabled_dt disabled_dt_str,
+				t.active_ind tag_status,
+				t.tag_ctgy_id up_tid,
+				'' tag_ctgy_level,
+				'' have_tag_ind,
+				t.unknown_ind unknown_ind,
+				(select a.tag_ctgy_nm from h50_tag_category_info a where tag_ctgy_id=t.tag_ctgy_id) up_name
+			FROM
+				h50_tag_info t
+			<where>
+			<if test="_parameter != null ">
+				t.tag_id = #{tagId}
+			</if>
+			</where>
+	</select>
+	
+	<select id="listLevelAll" resultType="string">
+		SELECT
+		tag_ctgy_level
+		FROM
+		h50_tag_category_info
+	</select>
+	<!-- 查询叶子标签 -->
+	<select id="queryTagList" resultType="com.eastern.jinxin.business.label.entity.TagInfoEntity">
+		SELECT
+		tag_id,tag_nm,tag_desc,tag_type_cd,tag_ctgy_id,
+		DATE_FORMAT(enabled_dt, '%Y-%m-%d') enabled_dt_str,
+		DATE_FORMAT(disabled_dt, '%Y-%m-%d') disabled_dt_str,
+		DATE_FORMAT(updated_ts, '%Y-%m-%d')updated_ts_str,
+		DATE_FORMAT(created_ts, '%Y-%m-%d') created_ts_str,
+		tag_type,
+		<![CDATA[ '' tag_ctgy_level]]>,
+		<![CDATA[ CASE  active_ind WHEN 1 THEN '启用' ELSE '禁用' END tag_status_str]]>
+		FROM h50_tag_info
+		<include refid="tagListBaseSql" />
+	</select>
+	<select id="queryTagCounts" resultType="int">
+		select count(1) cout from h50_tag_info
+		<include refid="tagListBaseSql" />
+	</select>
+</mapper>

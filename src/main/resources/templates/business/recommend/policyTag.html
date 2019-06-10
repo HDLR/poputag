@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>菜单管理</title>
+#parse("sys/header.html")
+<link rel="stylesheet" href="${request.contextPath}/statics/css/bootstrap-table.min.css">
+<link rel="stylesheet" href="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.css">
+<script src="${request.contextPath}/statics/libs/bootstrap-table.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.min.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.bootstrap3.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/jquery.treegrid.extension.js"></script>
+<script src="${request.contextPath}/statics/plugins/treegrid/tree.table.js"></script>
+</head>
+<body>
+  <div id="rrapp" v-cloak>
+    <div v-show="showList">
+      <div class="grid-btn">
+        #if($shiro.hasPermission("sys:menu:save"))
+        	<a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+        #end
+      </div>
+      <table id="menuTable" data-mobile-responsive="true" data-click-to-select="true">
+        <thead>
+          <tr>
+            <th data-field="selectItem" data-checkbox="true"></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div v-show="!showList" class='cus-p-diag'>
+      <div class="panel panel-default" style="width: 100%;height:100%;">
+        <form class="form-horizontal">
+        
+          <div class="form-group">
+            <div class="col-sm-2 control-label">类型</div>
+            <label class="radio-inline">
+              <input type="radio" name="type" value="1" v-model="menu.type" />
+              	政策标签类别
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="type" value="2" v-model="menu.type" />
+              	政策标签
+            </label>
+          </div>
+          
+          <div class="form-group" v-if="menu.type == 2">
+            <div class="col-sm-2 control-label">政策标签类别</div>
+            <div class="col-sm-10">
+            	<select v-model="menu.parent_id" class="form-control" style="cursor: pointer;">
+					<option v-for="option in tagTypes" v-bind:value="option.tagTypeId">
+				    	{{ option.tagTypeNm }}
+					</option>
+				</select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="col-sm-2 control-label">政策标签名称</div>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" v-model.trim="menu.name" placeholder="政策标签名称" />
+            </div>
+          </div>
+          
+        </form>
+        
+        <div class="form-group">
+          <div class="col-sm-2 control-label"></div>
+          <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" />
+          &nbsp;&nbsp;
+          <input type="button" class="btn btn-warning" @click="closed" value="返回" />
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  <!-- 选择菜单 -->
+  <div id="menuLayer" style="display: none; padding: 10px;">
+    <ul id="menuTree" class="ztree"></ul>
+  </div>
+  <script src="${rc.contextPath}/js/recommend/policyTag.js"></script> 
+</body>
+</html>
